@@ -1,4 +1,4 @@
-# Playr: yet another HTML5 <video> player
+# Playr: yet another HTML5 &lt;video&gt; player
 
 ## Compatibility
 
