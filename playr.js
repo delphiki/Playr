@@ -16,6 +16,8 @@ function Playr(v_id, v_el){
 	this.timecode_refresh = false;
 	this.captions_refresh = false;
 	this.isFullscreen = false;
+	this.isHoldingTime = false;
+	this.isHoldingVolume = false;	
 	this.wwidth = 0;
 	this.track_tags = new Array();
 	this.current_track = -1;
@@ -23,6 +25,8 @@ function Playr(v_id, v_el){
 	
 	if(typeof Playr.initialized == "undefined"){
 		Playr.prototype.init = function(){
+			var w = this.video.offsetWidth;
+			
 			var wrapper = document.createElement('div');
 			var newAttr = document.createAttribute('class');
 		    newAttr.nodeValue = 'playr_wrapper';
@@ -45,12 +49,16 @@ function Playr(v_id, v_el){
 		    	+'<li><div class="playr_timebar" id="playr_timebar_'+this.video_id+'"><div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'"><div class="playr_timebar_pos"></div></div></div></li>'
 		    	+'<li><span id="playr_video_curpos_'+this.video_id+'">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
 		    	+'<li><a class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_sound.png" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></a>'
-		    		+'<input type="range" class="video_volume" id="playr_volume_'+this.video_id+'" min="0" max="100" value="75" /></li>'
+		    		+'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'">'
+		    			+'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></div></div></div>'
+		    		+'</div>'
+		    	+'</li>'
 		    	+'<li><a class="playr_captions_btn">CC</a>'
 		    		+'<form id="playr_cc_form_'+this.video_id+'"><ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
 		    			+'<li id="playr_cc_track_'+this.video_id+'_none">'
+		    				+'<label for="playr_current_cc_'+this.video_id+'_none">'
 		    				+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" checked="checked" />'
-		    				+'<label for="playr_current_cc_'+this.video_id+'_none"> None</label>'
+		    				+' None</label>'
 		    			+'</li>'
 		    		+'</ul></form>'
 		    	+'</li>'
@@ -60,15 +68,24 @@ function Playr(v_id, v_el){
 		    
 		    this.video.parentNode.insertBefore(wrapper,this.video);
 		    document.getElementById('playr_video_container_'+this.video_id).appendChild(this.video);
+		    document.getElementById('playr_wrapper_'+this.video_id).style.width = w+'px';
 		    
 			var that = this;
 			this.video.addEventListener('click', function(){ that.play(); return false; }, false);
 			document.getElementById('playr_play_btn_'+this.video_id).addEventListener('click', function(){ that.play(); }, false);
-			document.getElementById('playr_timebar_'+this.video_id).addEventListener('click', function(){ that.setPosition(); }, false);
+			
+			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingTime = true; }, false);
+			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingTime = false; that.setPosition(e, true); }, false);
+			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mousemove', function(e){ if(that.isHoldingTime){that.setPosition(e, false);}; }, false);
+						
+			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingVolume = true; }, false);
+			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingVolume = false; that.setVolume(e); }, false);
+			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousemove', function(e){ if(that.isHoldingVolume){that.setVolume(e);}; }, false);
+						
 			document.getElementById('playr_mute_btn_'+this.video_id).addEventListener('click', function(){ that.toggleMute(); }, false);
-			document.getElementById('playr_volume_'+this.video_id).addEventListener('change', function(){ that.setVolume(); }, false);
 			document.getElementById('playr_fullscreen_btn_'+this.video_id).addEventListener('click', function(){ that.fullscreen(); }, false);
 			
+			this.video.volume = 0.75;
 			this.loadTracks();
 		};
 		
@@ -98,7 +115,9 @@ function Playr(v_id, v_el){
 			if(!isNaN(this.video.duration) && document.getElementById('playr_video_duration_'+this.video_id).innerHTML == '00:00'){
 				document.getElementById('playr_video_duration_'+this.video_id).innerHTML = this.parseTimeCode(this.video.duration);
 			}
-			document.getElementById('playr_timebar_inner_'+this.video_id).style.width = this.video.currentTime * 100 / this.video.duration + '%' ;
+			if(!this.isHoldingTime){
+				document.getElementById('playr_timebar_inner_'+this.video_id).style.width = this.video.currentTime * 100 / this.video.duration + '%' ;
+			}
 		};
 		
 		Playr.prototype.parseTimeCode = function(nb_sec){
@@ -122,25 +141,24 @@ function Playr(v_id, v_el){
 		Playr.prototype.findPos = function(el){
 			var x = y = 0;
 			if(el.offsetParent){
-				x = el.offsetLeft;
-				y = el.offsetTop;
-				while(el = el.offsetParent){
+				do {
 					x += el.offsetLeft;
 					y += el.offsetTop;
-				}
+				}while(el = el.offsetParent);					
 			}
-			return x;
+			return {x:x,y:y};
 		};
 		
-		Playr.prototype.setPosition = function(){
+		Playr.prototype.setPosition = function(ev, update_cT){
 			var timebar = document.getElementById('playr_timebar_'+this.video_id);
-			var ev = window.event;
 			var pos = this.findPos(timebar);
-			var diffx = ev.clientX - pos;
+			var diffx = ev.pageX - pos.x;
 			var dur = this.video.duration;
 			var curTime = Math.round(diffx * 100 / timebar.offsetWidth);
 			document.getElementById('playr_timebar_inner_'+this.video_id).style.width = curTime.toString()+'%';
-			this.video.currentTime = Math.round(curTime * dur / 100);
+			if(update_cT){
+				this.video.currentTime = Math.round(curTime * dur / 100);
+			}
 		};
 		
 		Playr.prototype.toggleMute = function(){
@@ -157,8 +175,15 @@ function Playr(v_id, v_el){
 			return false;
 		};
 				
-		Playr.prototype.setVolume = function(){
-			this.video.volume = document.getElementById('playr_volume_'+this.video_id).value / 100;			
+		Playr.prototype.setVolume = function(ev){
+			var volumebar = document.getElementById('playr_volumebar_'+this.video_id);
+			var pos = this.findPos(volumebar);
+			var diffy = ev.pageY - pos.y;
+			var curVol = 100 - Math.round(diffy * 100 / volumebar.offsetHeight);
+			if(curVol <= 100){
+				document.getElementById('playr_volumebar_inner_'+this.video_id).style.height = curVol.toString()+'%';
+				this.video.volume = curVol / 100;
+			}
 		};
 		
 		Playr.prototype.fullscreen = function(){
@@ -198,9 +223,11 @@ function Playr(v_id, v_el){
 			req_track.onreadystatechange = function(){
 				 if(req_track.readyState == 4){
 					that.subs.push(that.parseTrack(req_track.responseText, 'subtitles'));
-					var lang = curTrack.getAttribute('srclang');
-					var str = '<li><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /><label for="playr_current_cc_'+that.video_id+'_'+track+'"> '+lang+'</label></li>';
-					document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
+					if(req_track.responseText != ''){
+						var lang = curTrack.getAttribute('srclang');
+						var str = '<li><label for="playr_current_cc_'+that.video_id+'_'+track+'"><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+lang+'</label></li>';
+						document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
+					}
 					track++;
 					if(track < that.track_tags.length){
 						that.loadSubtitles(track);
@@ -313,10 +340,8 @@ window.onload = function(){
 	setTimeout(function(){
 		var video_tags = document.querySelectorAll('video.playr_video');
 		for(v = 0; v < video_tags.length; v++){
-			var w = video_tags[v].offsetWidth;
 			var p = new Playr(v, video_tags[v]);
 			p.init();
-			document.getElementById('playr_wrapper_'+v).style.width = w+'px';
 		}	
 	},1000);	
 }
