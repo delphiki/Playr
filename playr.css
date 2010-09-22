@@ -100,6 +100,7 @@
 
 .playr_controls > li:nth-child(4){
 	width:30px;
+	position:relative;
 }
 
 .playr_controls > li:nth-child(5){
@@ -117,7 +118,7 @@
 	background-color:transparent;
 	border:none;
 	color:#fff;
-	cursor:hand;
+	cursor:pointer;
 	opacity:0.5;
 	transition:opacity .3s ease;
 	-o-transition:opacity .3s ease;
@@ -177,6 +178,28 @@
 	-webkit-box-shadow: 0 0 5px #333;
 }
 
+.playr_timebar_notice{
+	display:none;
+	opacity:0;
+	transition:opacity .3s ease;
+	-o-transition:opacity .3s ease;
+	-webkit-transition:opacity .3s ease;
+	-moz-transition:opacity .3s ease;
+}
+
+.playr_timebar:hover + .playr_timebar_notice{
+	position:absolute;
+	margin-top:-45px;
+	display:block;
+	opacity:1;
+	background-color:#fff;
+	color:#888;
+	padding:0 3px;
+	border-radius:8px;
+	-webkit-border-radius:8px;
+	-moz-border-radius:8px;
+}
+
 .playr_controls > li:nth-child(4):hover .playr_volume_ctrl, .playr_volume_ctrl:hover{
 	display:block;
 	opacity:1;
@@ -186,7 +209,7 @@
 	display:none;
 	opacity:0;
 	position:absolute;
-	bottom:26px;
+	margin-top:-154px;
 	height:110px;
 	color:#fff;
 	background-color:#000;
@@ -251,6 +274,7 @@
 
 .playr_cc_tracks{
 	display:none;
+	visibility:hidden;
 	opacity:0;
 	color:#fff;
 	width:100px;
@@ -260,8 +284,8 @@
 	text-align:left;
 	list-style:none;
 	position:absolute;
-	bottom:26px;
-	right:0;
+	margin-top:-35px;
+	margin-left:-75px;
 	border:1px solid #e3e3e3;
 	transition:opacity .3s ease;
 	-o-transition:opacity .3s ease;
@@ -270,8 +294,12 @@
 }
 
 .playr_controls > li:nth-child(5):hover .playr_cc_tracks, .playr_cc_tracks:hover{
-	display:block;
 	opacity:1;
+}
+
+.playr_cc_tracks:hover{
+	display:block;
+	visibility:visible;
 }
 
 .playr_cc_tracks li:hover{

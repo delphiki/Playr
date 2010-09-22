@@ -4,7 +4,7 @@
 
 * Opera
 * Chrome / Safari
-* Firefox (except volume control: range type inputs not supported) 
+* Firefox
 
 ## Features
 
