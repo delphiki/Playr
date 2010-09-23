@@ -3,15 +3,13 @@
 ## Compatibility
 
 * Opera
-* Chrome / Safari
+* Chrome / -Safari-
 * Firefox
 
 ## Features
 
 * Easy integration
 * Multiple SubRip / WebSRT tracks support
-* Fullscreen not working yet
-* No Flash fallback yet
 
 ## Usage
 

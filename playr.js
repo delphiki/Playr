@@ -18,7 +18,8 @@ function Playr(v_id, v_el){
 	this.isFullscreen = false;
 	this.isHoldingTime = false;
 	this.isHoldingVolume = false;	
-	this.wwidth = 0;
+	this.fsStyle = null;
+	this.fsVideoStyle = null;
 	this.track_tags = new Array();
 	this.current_track = -1;
 	this.subs = new Array();
@@ -56,13 +57,13 @@ function Playr(v_id, v_el){
 		    		+'</div>'
 		    	+'</li>'
 		    	+'<li><a class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'">CC</a>'
-		    		+'<form id="playr_cc_form_'+this.video_id+'"><ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
+		    		+'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
 		    			+'<li id="playr_cc_track_'+this.video_id+'_none">'
 		    				+'<label for="playr_current_cc_'+this.video_id+'_none">'
 		    				+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" checked="checked" />'
 		    				+' None</label>'
 		    			+'</li>'
-		    		+'</ul></form>'
+		    		+'</ul>'
 		    	+'</li>'
 		    	+'<li><a class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_fullscreen.png" alt="fullscreen" /></a></li>'
 		    	+'</ul>';
@@ -91,6 +92,8 @@ function Playr(v_id, v_el){
 			
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseover', function(){ that.displayTrackCtrl(); }, false);
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseout', function(){ that.displayTrackCtrl(); }, false);
+			
+			document.addEventListener('keydown', function(e){that.keyboard(e)}, false);
 			
 			this.video.volume = 0.75;
 			this.loadTracks();
@@ -187,18 +190,26 @@ function Playr(v_id, v_el){
 		};
 		
 		Playr.prototype.fullscreen = function(){
-			if(!this.isFullscreen){				
-				this.video.style.position = 'fixed';
-				this.video.style.top = 0;
-				this.video.style.top = 0;
-				this.video.style.margin = 'auto';
-				this.video.style.height = window.innerHeight+'px';
-				document.getElementById('playr_wrapper_'+this.video_id).style.height = '100%';
+			var wrapper = document.getElementById('playr_wrapper_'+this.video_id);
+			var captions = document.getElementById('playr_captions_'+this.video_id);
+			if(!this.isFullscreen){
+				this.fsStyle = wrapper.style;
+				this.fsVideoStyle = this.video.offsetHeight;
+				wrapper.style.position = 'fixed';
+				wrapper.style.top = 0;
+				wrapper.style.left = '50%';
+				wrapper.style.height = window.innerHeight+'px';
+				wrapper.style.width = null;
+				this.video.style.height = (window.innerHeight - 30)+'px';
+				wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
 				this.isFullscreen = true;
 			}
 			else{
-				this.video.style.position = 'normal';
-				document.getElementById('playr_wrapper_'+this.video_id).style.width = this.wwidth+'px';
+				wrapper.style.position = 'inherit';
+				wrapper.style = this.fsStyle;
+				wrapper.style.left = 0;
+				wrapper.style.marginLeft = 0;
+				this.video.style.height = this.fsVideoStyle+'px';
 				this.isFullscreen = false;
 			}
 			return false;
@@ -219,9 +230,9 @@ function Playr(v_id, v_el){
 			var that = this;
 			var curTrack = that.track_tags[track];
 			var req_track = new XMLHttpRequest();
-			req_track.open('GET', curTrack.getAttribute('src'), false);
+			req_track.open('GET', curTrack.getAttribute('src'));
 			req_track.onreadystatechange = function(){
-				 if(req_track.readyState == 4){
+				if(req_track.readyState == 4 && (req_track.status == 200 || req_track.status == 0)){
 					that.subs.push(that.parseTrack(req_track.responseText, 'subtitles'));
 					if(req_track.responseText != ''){
 						var lang = curTrack.getAttribute('srclang');
@@ -234,7 +245,7 @@ function Playr(v_id, v_el){
 					}
 				 }
 			}
-  			req_track.send(null);		
+			req_track.send(null);		
 		};
 		
 		Playr.prototype.tc2sec = function(timecode){
@@ -362,6 +373,16 @@ function Playr(v_id, v_el){
 			notice.innerHTML = this.parseTimeCode(Math.round(curTime * this.video.duration / 100));
 			
 			notice.style.marginLeft = (diffx + 3 - notice.offsetWidth / 2)+'px';
+		};
+		
+		Playr.prototype.keyboard = function(ev){
+			switch(ev.keyCode){
+				case 27:
+					if(this.isFullscreen){
+						this.fullscreen();
+					}
+				break;
+			}
 		};
 		
 		Playr.initialized = true;
