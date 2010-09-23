@@ -1,6 +1,6 @@
 #### Known issues
 * Volume control not working in Opera if there's more than one video on the same "line"
-* Firefox not restauring properly from fullscreen
+* Firefox not restoring properly from fullscreen
 * Safari crashing when using the Playr
 
 #### TODO
@@ -9,8 +9,8 @@
 
 ### v0.2
 * Fixed a bug where Firefox would not get and display the subtitles
-* Added a basic fullscreen option (buggy in Firefox when restauring)
-* Added keyboard escape shorcut to restaure from fullscreen
+* Added a basic fullscreen option (buggy in Firefox when restoring)
+* Added keyboard escape shorcut to restore from fullscreen
 
 ### v0.1.6
 * Fixed volume and closed captions controls in Firefox
