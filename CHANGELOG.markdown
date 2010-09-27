@@ -1,11 +1,14 @@
 #### Known issues
 * Volume control not working in Opera if there's more than one video on the same "line"
 * Firefox not restoring properly from fullscreen
-* Safari crashing when using the Playr
 
 #### TODO
 * Fix issues above
 * Add a Flash fallback
+
+### v0.2.1
+* Improved Safari performances: frozen while loading, but smooth once loaded
+* New way of adding the controls
 
 ### v0.2
 * Fixed a bug where Firefox would not get and display the subtitles

@@ -11,6 +11,7 @@ function Playr(v_id, v_el){
 		img_dir: './images/'
 	};
 	
+	this.ready = false;
 	this.video_id = v_id;
 	this.video = v_el;
 	this.timecode_refresh = false;
@@ -97,6 +98,7 @@ function Playr(v_id, v_el){
 			
 			this.video.volume = 0.75;
 			this.loadTracks();
+			this.ready = true;
 		};
 		
 		Playr.prototype.play = function(){
@@ -387,15 +389,21 @@ function Playr(v_id, v_el){
 		
 		Playr.initialized = true;
 	}
+	if('oncanplay' in document.documentElement && !this.ready){ // Opera
+		this.init();
+	}
+	else{ // others
+		var that = this;
+		this.video.addEventListener('canplay', function(){
+			if(!that.ready)
+				that.init();
+		}, false);
+	}
 };
 
 window.onload = function(){
-	setTimeout(function(){
-		var video_tags = document.querySelectorAll('video.playr_video');
-		for(v = 0; v < video_tags.length; v++){
-			
-			var p = new Playr(v, video_tags[v]);
-			p.init();
-		}	
-	},1000);	
+	var video_tags = document.querySelectorAll('video.playr_video');
+	for(v = 0; v < video_tags.length; v++){
+		var p = new Playr(v, video_tags[v]);
+	}
 }
