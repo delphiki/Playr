@@ -1,5 +1,5 @@
 /**
- * Playr v0.1
+ * Playr v2.5
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -24,7 +24,7 @@ function Playr(v_id, v_el){
 	this.track_tags = new Array();
 	this.current_track = -1;
 	this.subs = new Array();
-	
+		
 	if(typeof Playr.initialized == "undefined"){
 		Playr.prototype.init = function(){
 			var w = this.video.offsetWidth;
@@ -40,6 +40,7 @@ function Playr(v_id, v_el){
 		    var newAttr = document.createAttribute('id');
 		    newAttr.nodeValue = 'playr_video_'+this.video_id;
 		    this.video.setAttributeNode(newAttr);
+		    this.video.removeAttribute('controls');
 		    					    		    		    
 		    var template = '<div class="playr_captions_wrapper" id="playr_captions_wrapper_'+this.video_id+'">'
 		    	+'<div class="playr_top_overlay" id="playr_top_overlay_'+this.video_id+'"><a href="http://www.delphiki.com/html5/playr/">Playr</a></div>'
@@ -332,7 +333,7 @@ function Playr(v_id, v_el){
 						}
 						captions_div.innerHTML = '<p style="'+styles+'">'+text+'</p>';
 						captions_div.style.visibility = 'visible';
-					return;
+						return;
 					}
 					else{
 						captions_div.style.visibility = 'hidden';
@@ -389,14 +390,14 @@ function Playr(v_id, v_el){
 		
 		Playr.initialized = true;
 	}
-	if('oncanplay' in document.documentElement && !this.ready){ // Opera
+	
+	if(this.video.readyState == 4 && !this.ready){
 		this.init();
 	}
-	else{ // others
+	else{
 		var that = this;
-		this.video.addEventListener('canplay', function(){
-			if(!that.ready)
-				that.init();
+		this.video.addEventListener('canplay', function(e){
+			if(!that.ready) that.init();
 		}, false);
 	}
 };
