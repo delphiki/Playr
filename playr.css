@@ -276,7 +276,8 @@
 	visibility:hidden;
 	opacity:0;
 	color:#fff;
-	width:100px;
+	min-width:100px;
+	font-size:0.9em;
 	background-color:#000;
 	padding:4px;
 	margin:0;

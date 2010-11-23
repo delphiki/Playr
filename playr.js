@@ -1,5 +1,5 @@
 /**
- * Playr v2.5
+ * Playr v0.2.6
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -193,26 +193,37 @@ function Playr(v_id, v_el){
 		};
 		
 		Playr.prototype.fullscreen = function(){
+			var vids = document.querySelectorAll('.playr_wrapper');
 			var wrapper = document.getElementById('playr_wrapper_'+this.video_id);
 			var captions = document.getElementById('playr_captions_'+this.video_id);
 			if(!this.isFullscreen){
-				this.fsStyle = wrapper.style;
-				this.fsVideoStyle = this.video.offsetHeight;
+				for(i = 0; i<vids.length; i++)
+					vids[i].style.visibility = 'hidden';
+				wrapper.style.visibility = 'visible';
+				this.fsStyle = { height: wrapper.style.height, width: wrapper.style.width };
+				this.fsVideoStyle = { height: this.video.offsetHeight, width: this.video.offsetWidth };
+				wrapper.style.backgroundColor = '#000000';
 				wrapper.style.position = 'fixed';
 				wrapper.style.top = 0;
 				wrapper.style.left = '50%';
-				wrapper.style.height = window.innerHeight+'px';
-				wrapper.style.width = null;
+				wrapper.style.height =  window.innerHeight+'px';
+				wrapper.style.width = window.innerWidth+'px';
+				this.video.style.width = window.innerWidth+'px';
 				this.video.style.height = (window.innerHeight - 30)+'px';
 				wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
 				this.isFullscreen = true;
 			}
 			else{
+				for(i = 0; i<vids.length; i++)
+					vids[i].style.visibility = 'visible';
+				wrapper.style.backgroundColor = 'transparent';
 				wrapper.style.position = 'inherit';
-				wrapper.style = this.fsStyle;
+				wrapper.style.height = this.fsStyle.height;
+				wrapper.style.width = this.fsStyle.width;
 				wrapper.style.left = 0;
 				wrapper.style.marginLeft = 0;
-				this.video.style.height = this.fsVideoStyle+'px';
+				this.video.style.height = this.fsVideoStyle.height+'px';
+				this.video.style.width = this.fsVideoStyle.width+'px';
 				this.isFullscreen = false;
 			}
 			return false;
@@ -239,6 +250,7 @@ function Playr(v_id, v_el){
 					that.subs.push(that.parseTrack(req_track.responseText, 'subtitles'));
 					if(req_track.responseText != ''){
 						var lang = curTrack.getAttribute('srclang');
+						if(lang == null) lang = 'Track '+ (track + 1);
 						var str = '<li><label for="playr_current_cc_'+that.video_id+'_'+track+'"><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+lang+'</label></li>';
 						document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
 					}

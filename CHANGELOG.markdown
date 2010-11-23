@@ -1,10 +1,19 @@
 #### Known issues
 * Volume control not working in Opera if there's more than one video on the same "line"
-* Firefox not restoring properly from fullscreen
 
 #### TODO
 * Fix issues above
 * Add a Flash fallback
+
+### v0.2.6
+* Improved fullscreen (based on window resolution)
+* Fixed Firefox not restoring properly from fullscreen
+* Made srclang attribute optionnal
+
+### v0.2.5
+* Improved integration script
+* Added remove "controls" attribute
+* Cleaned CSS
 
 ### v0.2.1
 * Improved Safari performances: frozen while loading, but smooth once loaded
