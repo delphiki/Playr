@@ -1,5 +1,5 @@
 /**
- * Playr v0.2.6
+ * Playr v0.2.6.1
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -95,8 +95,8 @@ function Playr(v_id, v_el){
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseover', function(){ that.displayTrackCtrl(); }, false);
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseout', function(){ that.displayTrackCtrl(); }, false);
 			
-			document.addEventListener('keydown', function(e){that.keyboard(e)}, false);
-			
+			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
+			window.addEventListener('resize', function(e){ if(that.isFullscreen) that.updateFullscreen(); }, false);
 			this.video.volume = 0.75;
 			this.loadTracks();
 			this.ready = true;
@@ -227,6 +227,15 @@ function Playr(v_id, v_el){
 				this.isFullscreen = false;
 			}
 			return false;
+		};
+		
+		Playr.prototype.updateFullscreen = function(){
+			var wrapper = document.getElementById('playr_wrapper_'+this.video_id);
+			wrapper.style.height = window.innerHeight+'px';
+			wrapper.style.width = window.innerWidth+'px';
+			this.video.style.width = window.innerWidth+'px';
+			this.video.style.height = (window.innerHeight - 30)+'px';
+			wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
 		};
 		
 		Playr.prototype.loadTracks = function(){

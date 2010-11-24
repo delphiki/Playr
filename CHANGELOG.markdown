@@ -5,10 +5,13 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.2.6.1
+* Added fullscreen auto-resize when resizing the window
+
 ### v0.2.6
 * Improved fullscreen (based on window resolution)
 * Fixed Firefox not restoring properly from fullscreen
-* Made srclang attribute optionnal
+* Made srclang attribute optional
 
 ### v0.2.5
 * Improved integration script
