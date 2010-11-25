@@ -1,5 +1,5 @@
 /**
- * Playr v0.2.6.1
+ * Playr v0.2.7
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -240,18 +240,26 @@ function Playr(v_id, v_el){
 				for(i = 0; i<vids.length; i++)
 					vids[i].style.visibility = 'hidden';
 				wrapper.style.visibility = 'visible';
+				
 				this.fsStyle = { height: wrapper.style.height, width: wrapper.style.width };
 				this.fsVideoStyle = { height: this.video.offsetHeight, width: this.video.offsetWidth };
+				
 				wrapper.style.backgroundColor = '#000000';
 				wrapper.style.position = 'fixed';
 				wrapper.style.top = 0;
 				wrapper.style.left = '50%';
 				wrapper.style.height =  window.innerHeight+'px';
 				wrapper.style.width = window.innerWidth+'px';
+				wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
 				this.video.style.width = window.innerWidth+'px';
 				this.video.style.height = (window.innerHeight - 30)+'px';
-				wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
+								
 				this.isFullscreen = true;
+				
+				// update captions' text size.
+				var factor = Math.round((window.innerHeight - 30) / this.fsVideoStyle.height * 100) / 100;
+				document.getElementById('playr_captions_'+this.video_id).style.fontSize = factor + 'em';
+				
 			}
 			else{
 				for(i = 0; i<vids.length; i++)
@@ -264,6 +272,7 @@ function Playr(v_id, v_el){
 				wrapper.style.marginLeft = 0;
 				this.video.style.height = this.fsVideoStyle.height+'px';
 				this.video.style.width = this.fsVideoStyle.width+'px';
+				document.getElementById('playr_captions_'+this.video_id).style.fontSize = '1em';
 				this.isFullscreen = false;
 			}
 			return false;
@@ -279,6 +288,8 @@ function Playr(v_id, v_el){
 			this.video.style.width = window.innerWidth+'px';
 			this.video.style.height = (window.innerHeight - 30)+'px';
 			wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
+			var factor = Math.round((window.innerHeight - 30) / this.fsVideoStyle.height * 100) / 100;
+			document.getElementById('playr_captions_'+this.video_id).style.fontSize = factor + 'em';
 		};
 		
 		/**

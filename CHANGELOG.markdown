@@ -5,6 +5,10 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.2.7
+* Added font size auto-scaling when using fullscreen
+* Added code documentation (merge branch documentation)
+
 ### v0.2.6.1
 * Added fullscreen auto-resize when resizing the window
 
