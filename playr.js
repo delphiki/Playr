@@ -6,6 +6,12 @@
  * http://www.delphiki.com/html5/playr
  */
 
+/**
+ * The Playr object
+ * @constructor
+ * @param {Integer} v_id A video id
+ * @param {DOMElement} v_el The video node
+ */
 function Playr(v_id, v_el){
 	this.config = {
 		img_dir: './images/'
@@ -102,6 +108,10 @@ function Playr(v_id, v_el){
 			this.ready = true;
 		};
 		
+		/**
+		 * Toggle play / pause (+ change the play button icon) 
+		 * @return false to prevent default
+		 */		
 		Playr.prototype.play = function(){
 			if(document.getElementById('playr_play_img_'+this.video_id).alt == 'play'){
 				this.video.play();
@@ -116,6 +126,9 @@ function Playr(v_id, v_el){
 			return false;
 		};
 		
+		/**
+		 * Display the current time code of the video
+		 */		
 		Playr.prototype.timeCode = function(){
 			document.getElementById('playr_video_curpos_'+this.video_id).innerHTML = this.parseTimeCode(this.video.currentTime);
 				
@@ -127,6 +140,11 @@ function Playr(v_id, v_el){
 			}
 		};
 		
+		/**
+		 * Convert seconds to MM:SS
+		 * @param {Integer} nb_sec A number of seconds
+		 * @return A time code string
+		 */
 		Playr.prototype.parseTimeCode = function(nb_sec){
 			nb_sec = Math.floor(nb_sec);
 			var nb_min = 0;
@@ -145,6 +163,11 @@ function Playr(v_id, v_el){
 			return min+':'+sec;
 		};
 		
+		/**
+		 * Find the global coordinates of the mouse
+ 		 * @param {DOMElement} The clicked element
+		 * @return A object containing the coordinates
+		 */
 		Playr.prototype.findPos = function(el){
 			var x = y = 0;
 			if(el.offsetParent){
@@ -156,6 +179,11 @@ function Playr(v_id, v_el){
 			return {x:x,y:y};
 		};
 		
+		/**
+		 * Set the current time of the video (by clicking on the timebar)
+		 * @param {Event} ev The click event
+		 * @param {Boolean} update_cT If true, update the timecode
+		 */
 		Playr.prototype.setPosition = function(ev, update_cT){
 			var timebar = document.getElementById('playr_timebar_'+this.video_id);
 			var pos = this.findPos(timebar);
@@ -167,6 +195,10 @@ function Playr(v_id, v_el){
 			}
 		};
 		
+		/**
+		 * Toggle Mute (+ changes the mute icon)
+		 * @return false to prevent default
+		 */
 		Playr.prototype.toggleMute = function(){
 			if(document.getElementById('playr_mute_icon_'+this.video_id).alt == 'mute'){
 				this.video.muted = true;
@@ -180,7 +212,11 @@ function Playr(v_id, v_el){
 			}
 			return false;
 		};
-				
+		
+		/**
+		 * Set the volume (0 < V < 1)
+		 * @param {Event} ev The click event
+		 */
 		Playr.prototype.setVolume = function(ev){
 			var volumebar = document.getElementById('playr_volumebar_'+this.video_id);
 			var pos = this.findPos(volumebar);
@@ -192,6 +228,10 @@ function Playr(v_id, v_el){
 			}
 		};
 		
+		/**
+		 * Toggle fullscreen
+		 * @return false to prevent default
+		 */
 		Playr.prototype.fullscreen = function(){
 			var wrapper = document.getElementById('playr_wrapper_'+this.video_id);
 			var captions = document.getElementById('playr_captions_'+this.video_id);
@@ -218,6 +258,9 @@ function Playr(v_id, v_el){
 			return false;
 		};
 		
+		/**
+		 * Look up for <track>s
+		 */
 		Playr.prototype.loadTracks = function(){
 			this.track_tags = this.video.getElementsByTagName('track');
 			for(i = 0; i < this.track_tags.length; i++){
@@ -229,6 +272,10 @@ function Playr(v_id, v_el){
 				this.loadSubtitles(0);
 		};
 		
+		/**
+		 * Get the content of the <track>s' sources (via XMLHttpRequest) and add an entrie to the track menu
+		 * @param {DOMElement} track A <track> node
+		 */
 		Playr.prototype.loadSubtitles = function(track){
 			var that = this;
 			var curTrack = that.track_tags[track];
@@ -251,15 +298,26 @@ function Playr(v_id, v_el){
 			req_track.send(null);		
 		};
 		
+		/** 
+		 * Convert MM:SS into seconds
+		 * @param {String} timecode A string with the format: MM:SS
+		 * @return A number of seconds
+		 */
 		Playr.prototype.tc2sec = function(timecode){
   			var tab = timecode.split(':');
 	  		return tab[0]*60*60 + tab[1]*60 + parseFloat(tab[2].replace(',','.'));
 		};
 	
-		Playr.prototype.parseTrack = function(track_source, track_kind){
+		/**
+		 * Parse WebSRT / SubRip subtitles
+		 * @param {String} track_content The content of the file
+		 * @param {String} track_kink 'subtitles', 'captions'... 
+		 * @return An array of cues' objects
+		 */
+		Playr.prototype.parseTrack = function(track_content, track_kind){
 			var pattern_identifier = /^[0-9]+$/;
 			var pattern_timecode = /^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --\> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})(.*)$/;
-			var lines = track_source.split(/\r?\n/);
+			var lines = track_content.split(/\r?\n/);
 			var entries = new Array();
 			for(i = 0; i<lines.length; i++) {
 				if(pattern_identifier.exec(lines[i])){
@@ -285,6 +343,9 @@ function Playr(v_id, v_el){
 			return entries;
 		};
 		
+		/**
+		 * Display the captions on the video (called on timeupdate)
+		 */
 		Playr.prototype.displayCaptions = function(){
 			var captions_div = document.getElementById('playr_captions_'+this.video_id);
 			var playr_cc_choices = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
@@ -346,6 +407,9 @@ function Playr(v_id, v_el){
 			return;
 		};
 		
+		/**
+		 * Display the track menu
+		 */
 		Playr.prototype.displayTrackCtrl = function(){
 			var menu = document.getElementById('playr_cc_tracks_'+this.video_id);
 			if(menu.style.display == 'block'){
@@ -359,6 +423,9 @@ function Playr(v_id, v_el){
 			}
 		};
 		
+		/**
+		 * Reset the video when the end is reached
+		 */
 		Playr.prototype.eventEnded = function(){
 			this.video.pause();
 			this.video.currentTime = 0;
@@ -366,6 +433,10 @@ function Playr(v_id, v_el){
 			document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
 		};
 		
+		/**
+		 * Display a time code indicator when hovering the timebar
+		 * @param {Event} ev The mouseover event
+		 */
 		Playr.prototype.noticeTimecode = function(ev){
 			var timebar = document.getElementById('playr_timebar_'+this.video_id);
 			var notice = document.getElementById('playr_timebar_notice_'+this.video_id);
@@ -378,6 +449,10 @@ function Playr(v_id, v_el){
 			notice.style.marginLeft = (diffx + 3 - notice.offsetWidth / 2)+'px';
 		};
 		
+		/**
+		 * Manage the keyboard events
+		 * @param {Event} ev The keyup event
+		 */
 		Playr.prototype.keyboard = function(ev){
 			switch(ev.keyCode){
 				case 27:
@@ -391,6 +466,9 @@ function Playr(v_id, v_el){
 		Playr.initialized = true;
 	}
 	
+	/**
+	 * Init the player
+	 */
 	if(this.video.readyState == 4 && !this.ready){
 		this.init();
 	}
