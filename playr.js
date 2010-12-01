@@ -1,5 +1,5 @@
 /**
- * Playr v0.2.7
+ * Playr v0.2.8
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -68,7 +68,7 @@ function Playr(v_id, v_el){
 		    		+'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
 		    			+'<li id="playr_cc_track_'+this.video_id+'_none">'
 		    				+'<label for="playr_current_cc_'+this.video_id+'_none">'
-		    				+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" checked="checked" />'
+		    				+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" />'
 		    				+' None</label>'
 		    			+'</li>'
 		    		+'</ul>'
@@ -328,11 +328,29 @@ function Playr(v_id, v_el){
 					if(track < that.track_tags.length){
 						that.loadSubtitles(track);
 					}
+					else{
+						that.setDefaultTrack();
+					}
 				 }
 			}
 			req_track.send(null);		
 		};
 		
+		/**
+		 * Set the default track base on srclang <track> attributes and <html> lang attribute
+		 */
+		Playr.prototype.setDefaultTrack = function(){
+			var lang = document.getElementsByTagName('html')[0].getAttribute('lang');
+			var track_list = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
+			var to_check = 0;
+			for(i = 0; i < this.track_tags.length; i++){				
+				if(this.track_tags[i].getAttribute('srclang') == lang){
+					to_check = i+1;
+				}
+			}
+			track_list[to_check].checked = true;
+		};
+		 
 		/** 
 		 * Convert MM:SS into seconds
 		 * @param {String} timecode A string with the format: MM:SS
