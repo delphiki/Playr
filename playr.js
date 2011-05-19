@@ -1,5 +1,5 @@
 /**
- * Playr v0.2.8
+ * Playr v0.3
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -32,6 +32,7 @@ function Playr(v_id, v_el){
 	this.subs = new Array();
 		
 	if(typeof Playr.initialized == "undefined"){
+		
 		Playr.prototype.init = function(){
 			var w = this.video.offsetWidth;
 			
@@ -332,7 +333,7 @@ function Playr(v_id, v_el){
 						that.setDefaultTrack();
 					}
 				 }
-			}
+			};
 			req_track.send(null);		
 		};
 		
@@ -343,14 +344,40 @@ function Playr(v_id, v_el){
 			var lang = document.getElementsByTagName('html')[0].getAttribute('lang');
 			var track_list = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
 			var to_check = 0;
-			for(i = 0; i < this.track_tags.length; i++){				
+			var that = this;
+			track_list[0].addEventListener('change', function(){
+				that.setActiveTrack();
+			},false);
+			for(i = 0; i < this.track_tags.length; i++){
 				if(this.track_tags[i].getAttribute('srclang') == lang){
 					to_check = i+1;
 				}
+				track_list[i+1].addEventListener('change', function(){
+					that.setActiveTrack();
+				},false);
 			}
-			track_list[to_check].checked = true;
-		};
-		 
+			if(track_list[to_check])
+				track_list[to_check].checked = true;
+			else
+				track_list[0].checked = true;
+			this.setActiveTrack();
+		};		
+		
+		/**
+		 * Highlights the current track
+		 */		
+		Playr.prototype.setActiveTrack = function(){
+			var track_li = document.querySelectorAll('#playr_cc_tracks_'+this.video_id+' li');
+			var track_inputs = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
+			for(i = 0; i < track_inputs.length; i++){
+				if(track_inputs[i].checked){
+					track_li[i].className = 'active_track';
+				}
+				else
+					track_li[i].className = '';
+			}
+		}
+			
 		/** 
 		 * Convert MM:SS into seconds
 		 * @param {String} timecode A string with the format: MM:SS
@@ -364,7 +391,7 @@ function Playr(v_id, v_el){
 		/**
 		 * Parse WebSRT / SubRip subtitles
 		 * @param {String} track_content The content of the file
-		 * @param {String} track_kink 'subtitles', 'captions'... 
+		 * @param {String} track_kind 'subtitles', 'captions'... 
 		 * @return An array of cues' objects
 		 */
 		Playr.prototype.parseTrack = function(track_content, track_kind){
@@ -385,11 +412,11 @@ function Playr(v_id, v_el){
 							i++;
 						}
 						entries.push({
-	        							'start': this.tc2sec(timecode[1]),
-	                    			  	'stop': this.tc2sec(timecode[2]),
-	                       				'text': text,
-	                       				'settings': timecode[3]
-	                   			});
+	        				'start': this.tc2sec(timecode[1]),
+	                    	'stop': this.tc2sec(timecode[2]),
+	                       	'text': text,
+	                       	'settings': timecode[3]
+	                   	});
 					}
 	    		}
   			}
@@ -522,20 +549,15 @@ function Playr(v_id, v_el){
 	/**
 	 * Init the player
 	 */
-	if(this.video.readyState == 4 && !this.ready){
-		this.init();
-	}
-	else{
-		var that = this;
-		this.video.addEventListener('canplay', function(e){
-			if(!that.ready) that.init();
-		}, false);
-	}
+	var that = this;
+	this.video.addEventListener('canplay', function(e){ if(!that.ready) that.init(); }, false);
+	
+	
 };
 
-window.onload = function(){
+window.addEventListener('DOMContentLoaded',function(){
 	var video_tags = document.querySelectorAll('video.playr_video');
 	for(v = 0; v < video_tags.length; v++){
 		var p = new Playr(v, video_tags[v]);
 	}
-}
+}, false);

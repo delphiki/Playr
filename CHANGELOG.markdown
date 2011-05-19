@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.3
+* Interface improvements
+
 ### v0.2.8
 * Added track auto-select based on <html> lang & <track> srclang
 
