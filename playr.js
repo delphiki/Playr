@@ -1,5 +1,5 @@
 /**
- * Playr v0.3
+ * Playr
  *
  * @author Julien 'delphiki' Villetorte <gdelphiki@gmail.com>
  * http://twitter.com/delphiki
@@ -507,8 +507,8 @@ function Playr(v_id, v_el){
 		 * Reset the video when the end is reached
 		 */
 		Playr.prototype.eventEnded = function(){
-			this.video.pause();
 			this.video.currentTime = 0;
+			this.video.pause();
 			document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_play.png';
 			document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
 		};

@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.3.1
+* Fixed Firefox 4 replaying the video automatically
+* Removed version number in JS & CSS files
+* Added notes on local testing
+
 ### v0.3
 * Interface improvements
 
