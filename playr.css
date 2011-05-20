@@ -310,9 +310,6 @@
 
 .playr_controls > li:nth-child(5):hover .playr_cc_tracks, .playr_cc_tracks:hover{
 	opacity:1;
-}
-
-.playr_cc_tracks:hover{
 	display:block;
 	visibility:visible;
 }

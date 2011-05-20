@@ -35,6 +35,7 @@ function Playr(v_id, v_el){
 		
 		Playr.prototype.init = function(){
 			var w = this.video.offsetWidth;
+			var h = this.video.offsetHeight;
 			
 			var wrapper = document.createElement('div');
 			var newAttr = document.createAttribute('class');
@@ -80,6 +81,7 @@ function Playr(v_id, v_el){
 		    
 		    this.video.parentNode.insertBefore(wrapper,this.video);
 		    document.getElementById('playr_video_container_'+this.video_id).appendChild(this.video);
+		    document.getElementById('playr_video_container_'+this.video_id).style.height = h+'px';
 		    document.getElementById('playr_wrapper_'+this.video_id).style.width = w+'px';
 		    
 			var that = this;
@@ -543,21 +545,31 @@ function Playr(v_id, v_el){
 			}
 		};
 		
+		Playr.prototype.setup = function(){
+			var that = this;
+			this.video.addEventListener('canplay', function(){
+				that.init();
+			}, false);
+		};
+		
 		Playr.initialized = true;
 	}
 	
 	/**
 	 * Init the player
 	 */
-	var that = this;
-	this.video.addEventListener('canplay', function(e){ if(!that.ready) that.init(); }, false);
-	
-	
+	this.setup();
+	/*
+	alert(this.video.readyState);
+	this.video.addEventListener('canplay', function(e){ if(!that.ready) that.init(); }, false);	
+	*/
+	//this.video.addEventListener('loadedmetadata', function(){ alert('loadeddata') }, false);
 };
 
 window.addEventListener('DOMContentLoaded',function(){
 	var video_tags = document.querySelectorAll('video.playr_video');
+	var video_objects = [];
 	for(v = 0; v < video_tags.length; v++){
-		var p = new Playr(v, video_tags[v]);
+		video_objects.push(new Playr(v, video_tags[v]));
 	}
 }, false);
