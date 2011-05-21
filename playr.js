@@ -278,6 +278,9 @@ function Playr(v_id, v_el){
 				document.getElementById('playr_captions_'+this.video_id).style.fontSize = '1em';
 				this.isFullscreen = false;
 			}
+			
+		    document.getElementById('playr_video_container_'+this.video_id).style.height = this.video.offsetHeight+'px';
+			
 			return false;
 		};
 		
@@ -548,7 +551,8 @@ function Playr(v_id, v_el){
 		Playr.prototype.setup = function(){
 			var that = this;
 			this.video.addEventListener('canplay', function(){
-				that.init();
+                if(!that.ready)
+    				that.init();
 			}, false);
 		};
 		

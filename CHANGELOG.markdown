@@ -5,6 +5,13 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.3.3
+* Fixed fullscreen controls not displaying properly
+
+### v0.3.2
+* Changed the setup method
+* Some CSS fixes
+
 ### v0.3.1
 * Fixed Firefox 4 replaying the video automatically
 * Removed version number in JS & CSS files
