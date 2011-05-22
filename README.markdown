@@ -16,7 +16,7 @@
 Some browsers disable XMLHttpRequest on local files by default.
 
 * Opera: enable opera:config#UserPrefs|AllowFileXMLHttpRequest
-* Chrome: launch it with --allow-file-access-from-files (to be tested)
+* Chrome: launch it with --allow-file-access-from-files
 
 ## Usage
 

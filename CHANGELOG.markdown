@@ -5,6 +5,10 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.3.4
+* Added <track> label support
+* Added <c.classname> WebVTT tag support
+
 ### v0.3.3
 * Fixed fullscreen controls not displaying properly
 

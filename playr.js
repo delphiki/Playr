@@ -325,9 +325,12 @@ function Playr(v_id, v_el){
 				if(req_track.readyState == 4 && (req_track.status == 200 || req_track.status == 0)){
 					that.subs.push(that.parseTrack(req_track.responseText, 'subtitles'));
 					if(req_track.responseText != ''){
+						var label = curTrack.getAttribute('label');
 						var lang = curTrack.getAttribute('srclang');
-						if(lang == null) lang = 'Track '+ (track + 1);
-						var str = '<li><label for="playr_current_cc_'+that.video_id+'_'+track+'"><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+lang+'</label></li>';
+						if(label != null) track_label = label;
+						else if(lang != null) track_label = lang;
+						else track_label = 'Track '+ (track + 1);
+						var str = '<li><label for="playr_current_cc_'+that.video_id+'_'+track+'"><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+track_label+'</label></li>';
 						document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
 					}
 					track++;
@@ -447,21 +450,25 @@ function Playr(v_id, v_el){
 						var text = this.subs[this.current_track][i].text;
 						var styles = '';
 						
-						var voice_declarations = /(<narrator>|<music>|<sound>|<comment>|<credit>)/i;
+						var voice_declarations = /(<v.(.+)>)/i;
 						var test_vd = voice_declarations.exec(text);
 						if(test_vd){
 							text.replace(voice_declarations, '');
-							if(test_vd[1] == '<narrator>'){ styles += 'color:yellow;'; }
-							else if(test_vd[1] == '<music>' || test_vd[1] == '<sound>'){ text = '# ' + text + ' #'; }
-							else if(test_vd[1] == '<comment>' || test_vd[1] == '<credit>'){ text = '[ ' + text + ' ]'; }
 						}
 						
+						var classes = /<c\.([a-z0-9-_.]+)>/i;
+						var test_classes = classes.exec(text);
+						if(test_classes){
+							var classes_str = test_classes[1].replace('.', ' ');
+							text = text.replace(test_classes[0], '<span class="'+classes_str+'">');
+						}
+						text = text.replace(/(<\/v>|<\/c>)/i, '</span>');
 						text = text.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br />$2');
 		
 						if(this.subs[this.current_track][i].settings != ''){
 							var text_align = /A:(start|middle|end)/i;
 							var text_size = /S:([0-9]{0,3})%/i;
-							var vertical_text = /D:vertical/;
+							var vertical_text = /D:(vertical|vertical-lr)/i;
 							var test_ta = text_align.exec(this.subs[this.current_track][i].settings);
 							var test_ts = text_size.exec(this.subs[this.current_track][i].settings);
 							var test_vt = vertical_text.exec(this.subs[this.current_track][i].settings);
@@ -474,7 +481,8 @@ function Playr(v_id, v_el){
 								styles += 'font-size:'+(test_ts[1]/100)+'em;';
 							}
 							if(test_vt){
-								styles += 'writing-mode:tb-rl;';
+								if(test_vt[1] == 'vertical'){ styles += 'writing-mode:tb-rl;'; }
+								if(test_vt[1] == 'vertical-lr'){ styles += 'writing-mode:tb-lr;'; }
 							}
 						}
 						captions_div.innerHTML = '<p style="'+styles+'">'+text+'</p>';
