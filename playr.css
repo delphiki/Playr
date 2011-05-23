@@ -47,7 +47,7 @@
 
 .playr_captions{
 	position:absolute;
-	bottom:14px;
+	bottom:5%;
 	width:100%;
 	text-align:center;
 	color:#fff;
@@ -333,4 +333,18 @@
 
 .playr_fullscreen_btn{
 	padding-right:1px;
+}
+
+/* captions styles */
+
+.playr_captions_Astart{
+	text-align:left;
+}
+
+.playr_captions_Amiddle{
+	text-align:center;
+}
+
+.playr_captions_Aend{
+	text-align:right;
 }

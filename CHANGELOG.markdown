@@ -5,6 +5,10 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.4
+* Added line position (L:xx%) support
+* Code refactoring
+
 ### v0.3.4
 * Added <track> label support
 * Added <c.classname> WebVTT tag support

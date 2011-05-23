@@ -84,21 +84,38 @@ function Playr(v_id, v_el){
 		    document.getElementById('playr_video_container_'+this.video_id).style.height = h+'px';
 		    document.getElementById('playr_wrapper_'+this.video_id).style.width = w+'px';
 		    
+			this.initEventListeners();
+			this.video.volume = 0.75;
+			this.loadTracks();
+			this.ready = true;
+		};
+		
+		/**
+		 * Inits most the the event listeners
+		 */		
+		Playr.prototype.initEventListeners = function(){
 			var that = this;
+			
+			// video events
 			this.video.addEventListener('click', function(){ that.play(); return false; }, false);
 			this.video.addEventListener('timeupdate', function(){ that.timeCode(); that.displayCaptions(); }, false);
 			this.video.addEventListener('ended', function(){ that.eventEnded(); }, false);
+			this.video.addEventListener('play', function(){ that.playEvent(); }, false);
+			this.video.addEventListener('pause', function(){ that.playEvent(); }, false);
+			
 			document.getElementById('playr_play_btn_'+this.video_id).addEventListener('click', function(){ that.play(); }, false);
 			
+			// timebar events
 			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingTime = true; }, false);
 			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingTime = false; that.setPosition(e, true); }, false);
 			document.getElementById('playr_timebar_'+this.video_id).parentNode.addEventListener('mousemove', function(e){ that.noticeTimecode(e); if(that.isHoldingTime){that.setPosition(e, false);}; }, false);
-						
+			
+			// volume control events
 			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingVolume = true; }, false);
 			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingVolume = false; that.setVolume(e); }, false);
 			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousemove', function(e){ if(that.isHoldingVolume){that.setVolume(e);}; }, false);
-						
 			document.getElementById('playr_mute_btn_'+this.video_id).addEventListener('click', function(){ that.toggleMute(); }, false);
+			
 			document.getElementById('playr_fullscreen_btn_'+this.video_id).addEventListener('click', function(){ that.fullscreen(); }, false);
 			
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseover', function(){ that.displayTrackCtrl(); }, false);
@@ -106,28 +123,35 @@ function Playr(v_id, v_el){
 			
 			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
 			window.addEventListener('resize', function(e){ if(that.isFullscreen) that.updateFullscreen(); }, false);
-			this.video.volume = 0.75;
-			this.loadTracks();
-			this.ready = true;
-		};
-		
+		}
+			
 		/**
 		 * Toggle play / pause (+ change the play button icon) 
 		 * @return false to prevent default
 		 */		
 		Playr.prototype.play = function(){
-			if(document.getElementById('playr_play_img_'+this.video_id).alt == 'play'){
-				this.video.play();
-				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_pause.png';
-				document.getElementById('playr_play_img_'+this.video_id).alt = 'pause';
+			if(this.video.paused){
+				this.video.play();			
 			}
 			else{
 				this.video.pause();
-				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_play.png';
-				document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
 			}
 			return false;
 		};
+		
+		/**
+		 * Called when 'play' or 'pause' events are fired
+		 */
+		Playr.prototype.playEvent = function(){
+			if(this.video.paused){
+				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_play.png';
+				document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
+			}
+			else{
+				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_pause.png';
+				document.getElementById('playr_play_img_'+this.video_id).alt = 'pause';
+			}
+		}
 		
 		/**
 		 * Display the current time code of the video
@@ -258,11 +282,6 @@ function Playr(v_id, v_el){
 				this.video.style.height = (window.innerHeight - 30)+'px';
 								
 				this.isFullscreen = true;
-				
-				// update captions' text size.
-				var factor = Math.round((window.innerHeight - 30) / this.fsVideoStyle.height * 100) / 100;
-				document.getElementById('playr_captions_'+this.video_id).style.fontSize = factor + 'em';
-				
 			}
 			else{
 				for(i = 0; i<vids.length; i++)
@@ -275,7 +294,6 @@ function Playr(v_id, v_el){
 				wrapper.style.marginLeft = 0;
 				this.video.style.height = this.fsVideoStyle.height+'px';
 				this.video.style.width = this.fsVideoStyle.width+'px';
-				document.getElementById('playr_captions_'+this.video_id).style.fontSize = '1em';
 				this.isFullscreen = false;
 			}
 			
@@ -447,15 +465,22 @@ function Playr(v_id, v_el){
 			if(this.current_track >= 0){
 				for(i=0; i<this.subs[this.current_track].length; i++){
 					if(this.video.currentTime >= this.subs[this.current_track][i].start && this.video.currentTime <= this.subs[this.current_track][i].stop){
+
 						var text = this.subs[this.current_track][i].text;
-						var styles = '';
+						var captions_wrapper = document.getElementById('playr_captions_wrapper_'+this.video_id);
+						var captions_container_classes = ['playr_captions'];
+						var captions_container_styles = [];
+						var captions_styles = [];
+						var wrapper_classes = ['playr_captions_wrapper'];
 						
+						// voice declaration tags
 						var voice_declarations = /(<v.(.+)>)/i;
 						var test_vd = voice_declarations.exec(text);
 						if(test_vd){
 							text.replace(voice_declarations, '');
 						}
 						
+						// classes tags
 						var classes = /<c\.([a-z0-9-_.]+)>/i;
 						var test_classes = classes.exec(text);
 						if(test_classes){
@@ -465,27 +490,52 @@ function Playr(v_id, v_el){
 						text = text.replace(/(<\/v>|<\/c>)/i, '</span>');
 						text = text.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br />$2');
 		
+						// if cue settings
 						if(this.subs[this.current_track][i].settings != ''){
 							var text_align = /A:(start|middle|end)/i;
 							var text_size = /S:([0-9]{0,3})%/i;
+							var text_position = /T:([0-9]{0,3})%/i;
 							var vertical_text = /D:(vertical|vertical-lr)/i;
+							var line_position_percent = /L:([0-9]{0,3})%/i;
+							
 							var test_ta = text_align.exec(this.subs[this.current_track][i].settings);
 							var test_ts = text_size.exec(this.subs[this.current_track][i].settings);
+							var test_tp = text_position.exec(this.subs[this.current_track][i].settings);
 							var test_vt = vertical_text.exec(this.subs[this.current_track][i].settings);
+							var test_lpp = line_position_percent.exec(this.subs[this.current_track][i].settings);
+							
+							// if text align
 							if(test_ta){
-								if(test_ta[1] == 'start'){ styles += 'text-align:left;'; }
-								else if(test_ta[1] == 'middle'){ styles += 'text-align:center;'; }
-								else if(test_ta[1] == 'end'){ styles += 'text-align:right;'; }
+								if(test_ta[1] == 'start'){ captions_container_classes.push('playr_captions_Astart') }
+								else if(test_ta[1] == 'middle'){ captions_container_classes.push('playr_captions_Amiddle') }
+								else if(test_ta[1] == 'end'){ captions_container_classes.push('playr_captions_Aend') }
 							}
-							if(test_ts){
-								styles += 'font-size:'+(test_ts[1]/100)+'em;';
-							}
-							if(test_vt){
-								if(test_vt[1] == 'vertical'){ styles += 'writing-mode:tb-rl;'; }
-								if(test_vt[1] == 'vertical-lr'){ styles += 'writing-mode:tb-lr;'; }
+							
+							// if text size
+							if(test_ts){ captions_styles.push('font-size:'+(test_ts[1]/100)+'em'); }
+							
+							// if vertical text
+							if(test_vt){}
+							
+							// if line position (%)
+							if(test_lpp && test_lpp[1] >= 0 && test_lpp[1] <= 100){
+								captions_container_styles.push('bottom:'+(90-test_lpp[1])+'%');
 							}
 						}
-						captions_div.innerHTML = '<p style="'+styles+'">'+text+'</p>';
+						
+						if(this.isFullscreen){
+							var factor = Math.round((window.innerHeight - 30) / this.fsVideoStyle.height * 100) / 100;
+							captions_styles.push('font-size:' + Math.round(12*factor) + 'pt');
+						}
+						else{
+							
+						}
+						
+						captions_wrapper.setAttribute('class', wrapper_classes.join(' '));
+						captions_div.setAttribute('class', captions_container_classes.join(' '));
+						captions_div.setAttribute('style', captions_container_styles.join(';'));
+						
+						captions_div.innerHTML = '<p style="'+captions_styles.join(';')+'">'+text+'</p>';
 						captions_div.style.visibility = 'visible';
 						return;
 					}
