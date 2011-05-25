@@ -17,6 +17,7 @@ function Playr(v_id, v_el){
 		img_dir: './images/'
 	};
 	
+	this.setupStarted = false;
 	this.ready = false;
 	this.video_id = v_id;
 	this.video = v_el;
@@ -34,6 +35,8 @@ function Playr(v_id, v_el){
 	if(typeof Playr.initialized == "undefined"){
 		
 		Playr.prototype.init = function(){
+			this.setupStarted = true;
+			
 			var w = this.video.offsetWidth;
 			var h = this.video.offsetHeight;
 			
@@ -49,7 +52,7 @@ function Playr(v_id, v_el){
 		    newAttr.nodeValue = 'playr_video_'+this.video_id;
 		    this.video.setAttributeNode(newAttr);
 		    this.video.removeAttribute('controls');
-		    					    		    		    
+		    
 		    var template = '<div class="playr_captions_wrapper" id="playr_captions_wrapper_'+this.video_id+'">'
 		    	+'<div class="playr_top_overlay" id="playr_top_overlay_'+this.video_id+'"><a href="http://www.delphiki.com/html5/playr/">Playr</a></div>'
 		    	+'<div class="playr_video_container" id="playr_video_container_'+this.video_id+'"></div>'
@@ -57,7 +60,13 @@ function Playr(v_id, v_el){
 		    	+'</div>'
 		    	+'<ul class="playr_controls">'
 		    	+'<li><a class="playr_play_btn" id="playr_play_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_play.png" id="playr_play_img_'+this.video_id+'" alt="play" /></a></li>'
-		    	+'<li><div class="playr_timebar" id="playr_timebar_'+this.video_id+'"><div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'"><div class="playr_timebar_pos"></div></div></div>'
+		    	+'<li>'
+		    		+'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'">'
+		    			+'<div class="playr_timebar_buffer" id="playr_timebar_buffer_'+this.video_id+'"></div>'
+		    			+'<div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'">'
+		    				+'<div class="playr_timebar_pos"></div>'
+		    			+'</div>'
+		    		+'</div>'
 		    		+'<span class="playr_timebar_notice" id="playr_timebar_notice_'+this.video_id+'">00:00</span>'
 		    	+'</li>'
 		    	+'<li><span id="playr_video_curpos_'+this.video_id+'">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
@@ -102,6 +111,8 @@ function Playr(v_id, v_el){
 			this.video.addEventListener('ended', function(){ that.eventEnded(); }, false);
 			this.video.addEventListener('play', function(){ that.playEvent(); }, false);
 			this.video.addEventListener('pause', function(){ that.playEvent(); }, false);
+			this.video.addEventListener('volumechange', function(){ that.volumeChangedEvent(); }, false);
+			this.video.addEventListener('progress', function(){ that.progressEvent(); }, false);
 			
 			document.getElementById('playr_play_btn_'+this.video_id).addEventListener('click', function(){ that.play(); }, false);
 			
@@ -152,6 +163,53 @@ function Playr(v_id, v_el){
 				document.getElementById('playr_play_img_'+this.video_id).alt = 'pause';
 			}
 		}
+		
+		/**
+		 * Toggle Mute (+ changes the mute icon)
+		 * @return false to prevent default
+		 */
+		Playr.prototype.toggleMute = function(){
+			if(!this.video.muted){
+				this.video.muted = true;
+			}
+			else{
+				this.video.muted = false;
+			}
+			return false;
+		};
+		
+		/**
+		 * Set the volume (0 < V < 1)
+		 * @param {Event} ev The click event
+		 */
+		Playr.prototype.setVolume = function(ev){
+			var volumebar = document.getElementById('playr_volumebar_'+this.video_id);
+			var pos = this.findPos(volumebar);
+			var diffy = ev.pageY - pos.y;
+			var curVol = 100 - Math.round(diffy * 100 / volumebar.offsetHeight);
+			if(curVol <= 100){
+				document.getElementById('playr_volumebar_inner_'+this.video_id).style.height = curVol.toString()+'%';
+				this.video.volume = curVol / 100;
+			}
+		};
+		
+		/**
+		 * Called when 'volumechanged' event is fired
+		 */
+		Playr.prototype.volumeChangedEvent = function(){
+			if(this.video.volume <= 1){
+				document.getElementById('playr_volumebar_inner_'+this.video_id).style.height = (this.video.volume * 100).toString()+'%';
+			}
+			
+			if(this.video.muted){
+				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound_mute.png';
+				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'unmute';
+			}
+			else{
+				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound.png';
+				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'mute';
+			}
+		};
 		
 		/**
 		 * Display the current time code of the video
@@ -223,36 +281,26 @@ function Playr(v_id, v_el){
 		};
 		
 		/**
-		 * Toggle Mute (+ changes the mute icon)
-		 * @return false to prevent default
+		 * Updates the progress bar (buffered video)
 		 */
-		Playr.prototype.toggleMute = function(){
-			if(document.getElementById('playr_mute_icon_'+this.video_id).alt == 'mute'){
-				this.video.muted = true;
-				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound_mute.png';
-				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'unmute';
+		Playr.prototype.progressEvent = function(){
+			if(!this.video.buffered)
+				return;
+			
+			var that = this;
+			var buff = {
+				start: that.video.buffered.start(0),
+				end:  that.video.buffered.end(0)
+			}
+			
+			if(buff.end == that.video.duration){
+				document.getElementById('playr_timebar_buffer_'+this.video_id).style.width = (document.getElementById('playr_timebar_'+this.video_id).offsetWidth - 2)  + 'px';
 			}
 			else{
-				this.video.muted = false;
-				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound.png';
-				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'mute';
-			}
-			return false;
-		};
-		
-		/**
-		 * Set the volume (0 < V < 1)
-		 * @param {Event} ev The click event
-		 */
-		Playr.prototype.setVolume = function(ev){
-			var volumebar = document.getElementById('playr_volumebar_'+this.video_id);
-			var pos = this.findPos(volumebar);
-			var diffy = ev.pageY - pos.y;
-			var curVol = 100 - Math.round(diffy * 100 / volumebar.offsetHeight);
-			if(curVol <= 100){
-				document.getElementById('playr_volumebar_inner_'+this.video_id).style.height = curVol.toString()+'%';
-				this.video.volume = curVol / 100;
-			}
+				var bar_width = document.getElementById('playr_timebar_'+this.video_id).offsetWidth;
+				var cur_width = Math.round((buff.end * bar_width) / this.video.duration);
+				document.getElementById('playr_timebar_buffer_'+this.video_id).style.width = cur_width+'px';
+			}			
 		};
 		
 		/**
@@ -468,10 +516,10 @@ function Playr(v_id, v_el){
 
 						var text = this.subs[this.current_track][i].text;
 						var captions_wrapper = document.getElementById('playr_captions_wrapper_'+this.video_id);
-						var captions_container_classes = ['playr_captions'];
-						var captions_container_styles = [];
-						var captions_styles = [];
 						var wrapper_classes = ['playr_captions_wrapper'];
+						var captions_container_classes = ['playr_captions'];
+						var captions_container_styles = ['text-align:center'];
+						var captions_styles = [];						
 						
 						// voice declaration tags
 						var voice_declarations = /(<v.(.+)>)/i;
@@ -488,8 +536,7 @@ function Playr(v_id, v_el){
 							text = text.replace(test_classes[0], '<span class="'+classes_str+'">');
 						}
 						text = text.replace(/(<\/v>|<\/c>)/i, '</span>');
-						text = text.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br />$2');
-		
+						
 						// if cue settings
 						if(this.subs[this.current_track][i].settings != ''){
 							var text_align = /A:(start|middle|end)/i;
@@ -504,20 +551,30 @@ function Playr(v_id, v_el){
 							var test_vt = vertical_text.exec(this.subs[this.current_track][i].settings);
 							var test_lpp = line_position_percent.exec(this.subs[this.current_track][i].settings);
 							
-							// if text align
+							// if text align specified
 							if(test_ta){
-								if(test_ta[1] == 'start'){ captions_container_classes.push('playr_captions_Astart') }
-								else if(test_ta[1] == 'middle'){ captions_container_classes.push('playr_captions_Amiddle') }
-								else if(test_ta[1] == 'end'){ captions_container_classes.push('playr_captions_Aend') }
+								if(test_ta[1] == 'start'){ captions_styles.push('text-align:left') }
+								else if(test_ta[1] == 'middle'){ captions_styles.push('text-align:center') }
+								else if(test_ta[1] == 'end'){ captions_styles.push('text-align:right') }
 							}
 							
-							// if text size
+							// if text position specified
+							if(test_tp && test_tp[1] >= 0 && test_tp[1] < 50){
+								captions_container_styles.push('text-align:left');
+								captions_styles.push('margin-left:'+test_tp[1]+'%');
+							}
+							else if(test_tp && test_tp[1] > 50 && test_tp[1] <= 100){
+								captions_container_styles.push('text-align:right');
+								captions_styles.push('margin-right:'+(100-test_tp[1])+'%');
+							}
+							
+							// if text size specified
 							if(test_ts){ captions_styles.push('font-size:'+(test_ts[1]/100)+'em'); }
 							
-							// if vertical text
+							// if vertical text specified
 							if(test_vt){}
 							
-							// if line position (%)
+							// if line position (%) specified
 							if(test_lpp && test_lpp[1] >= 0 && test_lpp[1] <= 100){
 								captions_container_styles.push('bottom:'+(90-test_lpp[1])+'%');
 							}
@@ -535,7 +592,8 @@ function Playr(v_id, v_el){
 						captions_div.setAttribute('class', captions_container_classes.join(' '));
 						captions_div.setAttribute('style', captions_container_styles.join(';'));
 						
-						captions_div.innerHTML = '<p style="'+captions_styles.join(';')+'">'+text+'</p>';
+						text = text.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1</span><br /><span>$2');
+						captions_div.innerHTML = '<p style="'+captions_styles.join(';')+'"><span>'+text+'</span></p>';
 						captions_div.style.visibility = 'visible';
 						return;
 					}
@@ -608,9 +666,13 @@ function Playr(v_id, v_el){
 		
 		Playr.prototype.setup = function(){
 			var that = this;
+			
+			this.video.addEventListener('loadeddata', function(){
+				if(!that.ready && !that.setupStarted) that.init();
+			}, false);
+			
 			this.video.addEventListener('canplay', function(){
-                if(!that.ready)
-    				that.init();
+                if(!that.ready && !that.setupStarted) that.init();
 			}, false);
 		};
 		
