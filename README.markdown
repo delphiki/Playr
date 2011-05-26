@@ -28,6 +28,25 @@ Just add the class name "playr_video" to your video tag:
 		<track kind="subtitles" label="English Subtitles" srclang="en" src="mySubs.srt" /> // optional
 	</video>
 
+## WebVTT implementation
+
+Working features:
+* Text position (T:...%)
+* Text alignment (A:start|middle|end)
+* Text size (S:...%)
+* Line position (only L:...%)
+* Class tags
+* Cue timestamps tags
+
+Note on cue timestamps:
+
+	00:00:17,556 --> 00:00:20,631
+	Can you hear it?
+	<00:00:18,556>The noise, <00:00:19,600>the drumbeat?
+	
+::cue:past & ::cue:future are remplaced with the CSS classes playr_cue_past & playr_cue_future.
+They're not defined by default. Customize them as you wish.
+
 ## Demos
 
 See demos [on the project page](http://www.delphiki.com/html5/playr/).

@@ -523,19 +523,33 @@ function Playr(v_id, v_el){
 						
 						// voice declaration tags
 						var voice_declarations = /(<v.(.+)>)/i;
-						var test_vd = voice_declarations.exec(text);
-						if(test_vd){
+						while(test_vd = voice_declarations.exec(text)){
 							text.replace(voice_declarations, '');
 						}
 						
 						// classes tags
 						var classes = /<c\.([a-z0-9-_.]+)>/i;
-						var test_classes = classes.exec(text);
-						if(test_classes){
+						while(test_classes = classes.exec(text)){
 							var classes_str = test_classes[1].replace('.', ' ');
 							text = text.replace(test_classes[0], '<span class="'+classes_str+'">');
 						}
-						text = text.replace(/(<\/v>|<\/c>)/i, '</span>');
+						text = text.replace(/(<\/v>|<\/c>)/ig, '</span>');
+						
+						// karaoke (timestamps)
+						var timestamps = /<([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})>/;
+						var timestamp_opened = false;
+						var prefix = '';
+						while(test_timestamps = timestamps.exec(text)){
+							if(timestamp_opened){
+								var prefix = '</span>';
+							}
+							if(this.tc2sec(test_timestamps[1]) < this.video.currentTime){
+								text = text.replace(test_timestamps[0], prefix+'<span class="playr_cue_past">');
+							}
+							else{
+								text = text.replace(test_timestamps[0], prefix+'<span class="playr_cue_future">');
+							}
+						}
 						
 						// if cue settings
 						if(this.subs[this.current_track][i].settings != ''){

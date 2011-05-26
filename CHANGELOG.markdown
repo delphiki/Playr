@@ -5,6 +5,10 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.5.5
+* Added cue timestamps tags support (see notes on WebVTT implementation)
+* Cue tags parser fixes
+
 ### v0.5
 * Interface improvements
 * Added buffering bar
