@@ -28,9 +28,10 @@ function Playr(v_id, v_el){
 	this.isHoldingVolume = false;	
 	this.fsStyle = null;
 	this.fsVideoStyle = null;
-	this.track_tags = new Array();
+	this.track_tags = [];
 	this.current_track = -1;
-	this.subs = new Array();
+	this.subs = [];
+	this.chapters = [];
 		
 	if(typeof Playr.initialized == "undefined"){
 		
@@ -75,9 +76,10 @@ function Playr(v_id, v_el){
 		    			+'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></div></div></div>'
 		    		+'</div>'
 		    	+'</li>'
-		    	+'<li><a class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'">CC</a>'
+		    	+'<li><a class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'">Menu</a>'
 		    		+'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
-		    			+'<li id="playr_cc_track_'+this.video_id+'_none">'
+		    			+'<li class="playr_menu_title">Subtitles</li>'
+		    			+'<li class="playr_subtitles_item" id="playr_cc_track_'+this.video_id+'_none">'
 		    				+'<label for="playr_current_cc_'+this.video_id+'_none">'
 		    				+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" />'
 		    				+' None</label>'
@@ -93,9 +95,9 @@ function Playr(v_id, v_el){
 		    document.getElementById('playr_video_container_'+this.video_id).style.height = h+'px';
 		    document.getElementById('playr_wrapper_'+this.video_id).style.width = w+'px';
 		    
-			this.initEventListeners();
 			this.video.volume = 0.75;
-			this.loadTracks();
+			this.loadTrackTags();
+			this.initEventListeners();
 			this.ready = true;
 		};
 		
@@ -131,7 +133,7 @@ function Playr(v_id, v_el){
 			
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseover', function(){ that.displayTrackCtrl(); }, false);
 			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseout', function(){ that.displayTrackCtrl(); }, false);
-			
+				
 			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
 			window.addEventListener('resize', function(e){ if(that.isFullscreen) that.updateFullscreen(); }, false);
 		}
@@ -284,7 +286,7 @@ function Playr(v_id, v_el){
 		 * Updates the progress bar (buffered video)
 		 */
 		Playr.prototype.progressEvent = function(){
-			if(!this.video.buffered)
+			if(this.video.buffered.length == 0)
 				return;
 			
 			var that = this;
@@ -367,7 +369,7 @@ function Playr(v_id, v_el){
 		/**
 		 * Look up for <track>s
 		 */
-		Playr.prototype.loadTracks = function(){
+		Playr.prototype.loadTrackTags = function(){
 			this.track_tags = this.video.getElementsByTagName('track');
 			for(i = 0; i < this.track_tags.length; i++){
 				var newAttr = document.createAttribute('id');
@@ -375,35 +377,42 @@ function Playr(v_id, v_el){
 		    	this.track_tags[i].setAttributeNode(newAttr);
 			}
 			if(this.track_tags.length > 0)
-				this.loadSubtitles(0);
+				this.loadTrackContent(0);
 		};
 		
 		/**
 		 * Get the content of the <track>s' sources (via XMLHttpRequest) and add an entrie to the track menu
 		 * @param {DOMElement} track A <track> node
 		 */
-		Playr.prototype.loadSubtitles = function(track){
+		Playr.prototype.loadTrackContent = function(track){
 			var that = this;
 			var curTrack = that.track_tags[track];
 			var req_track = new XMLHttpRequest();
 			req_track.open('GET', curTrack.getAttribute('src'));
 			req_track.onreadystatechange = function(){
 				if(req_track.readyState == 4 && (req_track.status == 200 || req_track.status == 0)){
-					that.subs.push(that.parseTrack(req_track.responseText, 'subtitles'));
 					if(req_track.responseText != ''){
-						var label = curTrack.getAttribute('label');
-						var lang = curTrack.getAttribute('srclang');
-						if(label != null) track_label = label;
-						else if(lang != null) track_label = lang;
-						else track_label = 'Track '+ (track + 1);
-						var str = '<li><label for="playr_current_cc_'+that.video_id+'_'+track+'"><input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+track_label+'</label></li>';
-						document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
+						that.parseTrack(req_track.responseText, curTrack.getAttribute('kind'));
+						
+						if(curTrack.getAttribute('kind') == 'subtitles'){
+							var label = curTrack.getAttribute('label');
+							var lang = curTrack.getAttribute('srclang');
+							if(label != null) track_label = label;
+							else if(lang != null) track_label = lang;
+							else track_label = 'Track '+ (track + 1);
+							var str = '<li class="playr_subtitles_item"><label for="playr_current_cc_'+that.video_id+'_'+track+'">'
+									+'<input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '
+									+track_label
+								+'</label></li>';
+							document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
+						}
 					}
 					track++;
 					if(track < that.track_tags.length){
-						that.loadSubtitles(track);
+						that.loadTrackContent(track);
 					}
 					else{
+						that.buildChaptersMenu();
 						that.setDefaultTrack();
 					}
 				 }
@@ -422,13 +431,16 @@ function Playr(v_id, v_el){
 			track_list[0].addEventListener('change', function(){
 				that.setActiveTrack();
 			},false);
+			
 			for(i = 0; i < this.track_tags.length; i++){
-				if(this.track_tags[i].getAttribute('srclang') == lang){
-					to_check = i+1;
+				if(this.track_tags[i].getAttribute('kind') == 'subtitles'){
+					if(this.track_tags[i].getAttribute('srclang') == lang){
+						to_check = i+1;
+					}
+					track_list[i+1].addEventListener('change', function(){
+						that.setActiveTrack();
+					},false);
 				}
-				track_list[i+1].addEventListener('change', function(){
-					that.setActiveTrack();
-				},false);
 			}
 			if(track_list[to_check])
 				track_list[to_check].checked = true;
@@ -441,14 +453,14 @@ function Playr(v_id, v_el){
 		 * Highlights the current track
 		 */		
 		Playr.prototype.setActiveTrack = function(){
-			var track_li = document.querySelectorAll('#playr_cc_tracks_'+this.video_id+' li');
+			var track_li = document.querySelectorAll('#playr_cc_tracks_'+this.video_id+' li.playr_subtitles_item');
 			var track_inputs = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
 			for(i = 0; i < track_inputs.length; i++){
 				if(track_inputs[i].checked){
-					track_li[i].className = 'active_track';
+					track_li[i].className = 'playr_subtitles_item active_track';
 				}
 				else
-					track_li[i].className = '';
+					track_li[i].className = 'playr_subtitles_item';
 			}
 		}
 			
@@ -469,12 +481,15 @@ function Playr(v_id, v_el){
 		 * @return An array of cues' objects
 		 */
 		Playr.prototype.parseTrack = function(track_content, track_kind){
-			var pattern_identifier = /^[0-9]+$/;
+			if(track_kind == 'subtitles'){ var pattern_identifier = /^([0-9]+)$/; }
+			else if(track_kind == 'chapters'){ var pattern_identifier = /^chapter-([0-9])+$/; }
+			
 			var pattern_timecode = /^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --\> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})(.*)$/;
 			var lines = track_content.split(/\r?\n/);
+			
 			var entries = new Array();
 			for(i = 0; i<lines.length; i++) {
-				if(pattern_identifier.exec(lines[i])){
+				if(identifier = pattern_identifier.exec(lines[i])){
 					i++;
 					var timecode = pattern_timecode.exec(lines[i])
 					if(timecode && i<lines.length){
@@ -486,15 +501,49 @@ function Playr(v_id, v_el){
 							i++;
 						}
 						entries.push({
+							'identifier': identifier[0],
 	        				'start': this.tc2sec(timecode[1]),
 	                    	'stop': this.tc2sec(timecode[2]),
+	                    	'start_tc': timecode[1],
+	                    	'stop_tc': timecode[2],
 	                       	'text': text,
 	                       	'settings': timecode[3]
 	                   	});
 					}
 	    		}
   			}
-			return entries;
+  			if(track_kind == 'subtitles') this.subs.push(entries);
+  			else if(track_kind == 'chapters') this.chapters.push(entries);
+		};
+		
+		/**
+		 * Builds the chapters menu
+		 */		
+		Playr.prototype.buildChaptersMenu = function(){
+			var that = this;
+			var track_menu = document.getElementById('playr_cc_tracks_'+this.video_id);
+			if(this.chapters.length > 0){
+				var tmp = '<li class="playr_chapters_menu_title" id="playr_chapters_menu_title_'+this.video_id+'">Chapters <span style="float:right;">&gt;</span><ul class="playr_chapters_menu">';
+				for(i = 0; i < this.chapters[0].length; i++){
+					tmp += '<li><a href="#'+this.chapters[0][i].start_tc+'" class="playr_chapter_'+this.video_id+'" id="playr_chapter_'+this.video_id+'_'+i+'">'+this.chapters[0][i].text+'</a> ('+this.chapters[0][i].start_tc.split(',')[0]+')</li>';
+				}
+				tmp += '</ul></li>'
+				track_menu.innerHTML = tmp + track_menu.innerHTML;
+			}
+			var c = document.querySelectorAll('.playr_chapter_'+this.video_id);
+			for(i = 0; i < c.length; i++){
+				c[i].addEventListener('click', function(){ that.goToChapter(this); return false; }, false);
+			}
+		};
+		
+		/**
+		 * Jump to the specified chapter
+		 */
+		Playr.prototype.goToChapter = function(c){
+			var jumpto = c.getAttribute('href').split('#')[1];
+			this.video.currentTime = this.tc2sec(jumpto);
+			
+			return false;
 		};
 		
 		/**
@@ -537,19 +586,18 @@ function Playr(v_id, v_el){
 						
 						// karaoke (timestamps)
 						var timestamps = /<([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})>/;
-						var timestamp_opened = false;
-						var prefix = '';
+						var prefix = false;
 						while(test_timestamps = timestamps.exec(text)){
-							if(timestamp_opened){
-								var prefix = '</span>';
-							}
 							if(this.tc2sec(test_timestamps[1]) < this.video.currentTime){
-								text = text.replace(test_timestamps[0], prefix+'<span class="playr_cue_past">');
+								text = text.replace(test_timestamps[0], '</span><span class="playr_cue_past">');
 							}
 							else{
-								text = text.replace(test_timestamps[0], prefix+'<span class="playr_cue_future">');
+								text = text.replace(test_timestamps[0], '</span><span class="playr_cue_future">');
 							}
+							prefix = true;
 						}
+						if(prefix)
+							text = '<span class="playr_cue_past">' + text;
 						
 						// if cue settings
 						if(this.subs[this.current_track][i].settings != ''){

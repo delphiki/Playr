@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.5.6
+* Added basic chapters support
+
 ### v0.5.5
 * Added cue timestamps tags support (see notes on WebVTT implementation)
 * Cue tags parser fixes

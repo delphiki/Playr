@@ -31,6 +31,10 @@ Just add the class name "playr_video" to your video tag:
 ## WebVTT implementation
 
 Working features:
+
+* Track kinds:
+	* subtitles
+	* chapters
 * Text position (T:...%)
 * Text alignment (A:start|middle|end)
 * Text size (S:...%)
