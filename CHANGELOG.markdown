@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.5.7
+* Fixed parser (WebVTT timestamp milliseconds separator is a full stop, not a comma)
+
 ### v0.5.6
 * Added basic chapters support
 

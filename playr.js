@@ -484,7 +484,7 @@ function Playr(v_id, v_el){
 			if(track_kind == 'subtitles'){ var pattern_identifier = /^([0-9]+)$/; }
 			else if(track_kind == 'chapters'){ var pattern_identifier = /^chapter-([0-9])+$/; }
 			
-			var pattern_timecode = /^([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) --\> ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})(.*)$/;
+			var pattern_timecode = /^([0-9]{2}:[0-9]{2}:[0-9]{2}[,.]{1}[0-9]{3}) --\> ([0-9]{2}:[0-9]{2}:[0-9]{2}[,.]{1}[0-9]{3})(.*)$/;
 			var lines = track_content.split(/\r?\n/);
 			
 			var entries = new Array();
@@ -525,7 +525,7 @@ function Playr(v_id, v_el){
 			if(this.chapters.length > 0){
 				var tmp = '<li class="playr_chapters_menu_title" id="playr_chapters_menu_title_'+this.video_id+'">Chapters <span style="float:right;">&gt;</span><ul class="playr_chapters_menu">';
 				for(i = 0; i < this.chapters[0].length; i++){
-					tmp += '<li><a href="#'+this.chapters[0][i].start_tc+'" class="playr_chapter_'+this.video_id+'" id="playr_chapter_'+this.video_id+'_'+i+'">'+this.chapters[0][i].text+'</a> ('+this.chapters[0][i].start_tc.split(',')[0]+')</li>';
+					tmp += '<li><a href="#'+this.chapters[0][i].start_tc+'" class="playr_chapter_'+this.video_id+'" id="playr_chapter_'+this.video_id+'_'+i+'">'+this.chapters[0][i].text+'</a> ('+this.chapters[0][i].start_tc.split('.')[0]+')</li>';
 				}
 				tmp += '</ul></li>'
 				track_menu.innerHTML = tmp + track_menu.innerHTML;
@@ -585,7 +585,7 @@ function Playr(v_id, v_el){
 						text = text.replace(/(<\/v>|<\/c>)/ig, '</span>');
 						
 						// karaoke (timestamps)
-						var timestamps = /<([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})>/;
+						var timestamps = /<([0-9]{2}:[0-9]{2}:[0-9]{2}[,.]{1}[0-9]{3})>/;
 						var prefix = false;
 						while(test_timestamps = timestamps.exec(text)){
 							if(this.tc2sec(test_timestamps[1]) < this.video.currentTime){
