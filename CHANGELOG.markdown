@@ -5,6 +5,10 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.6
+* Updated WebVTT line position implementation according to the spec
+* default track attribute is now working properly
+
 ### v0.5.7
 * Fixed parser (WebVTT timestamp milliseconds separator is a full stop, not a comma)
 

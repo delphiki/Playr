@@ -434,7 +434,10 @@ function Playr(v_id, v_el){
 			
 			for(i = 0; i < this.track_tags.length; i++){
 				if(this.track_tags[i].getAttribute('kind') == 'subtitles'){
-					if(this.track_tags[i].getAttribute('srclang') == lang){
+					if(this.track_tags[i].getAttribute('srclang') == lang && to_check == 0){
+						to_check = i+1;
+					}
+					if(this.track_tags[i].hasAttribute('default')){
 						to_check = i+1;
 					}
 					track_list[i+1].addEventListener('change', function(){
@@ -571,7 +574,7 @@ function Playr(v_id, v_el){
 						var captions_styles = [];						
 						
 						// voice declaration tags
-						var voice_declarations = /(<v.(.+)>)/i;
+						var voice_declarations = /(<v (.+)>)/i;
 						while(test_vd = voice_declarations.exec(text)){
 							text.replace(voice_declarations, '');
 						}
@@ -605,13 +608,13 @@ function Playr(v_id, v_el){
 							var text_size = /S:([0-9]{0,3})%/i;
 							var text_position = /T:([0-9]{0,3})%/i;
 							var vertical_text = /D:(vertical|vertical-lr)/i;
-							var line_position_percent = /L:([0-9]{0,3})%/i;
+							var line_position = /L:(-?[0-9]{0,3})(%?)/i;
 							
 							var test_ta = text_align.exec(this.subs[this.current_track][i].settings);
 							var test_ts = text_size.exec(this.subs[this.current_track][i].settings);
 							var test_tp = text_position.exec(this.subs[this.current_track][i].settings);
 							var test_vt = vertical_text.exec(this.subs[this.current_track][i].settings);
-							var test_lpp = line_position_percent.exec(this.subs[this.current_track][i].settings);
+							var test_lpp = line_position.exec(this.subs[this.current_track][i].settings);
 							
 							// if text align specified
 							if(test_ta){
@@ -636,9 +639,13 @@ function Playr(v_id, v_el){
 							// if vertical text specified
 							if(test_vt){}
 							
-							// if line position (%) specified
-							if(test_lpp && test_lpp[1] >= 0 && test_lpp[1] <= 100){
-								captions_container_styles.push('bottom:'+(90-test_lpp[1])+'%');
+							// if line position specified
+							if(test_lpp && test_lpp[1] >= -100 && test_lpp[1] <= 100){
+								if(test_lpp[2] == '%'){
+									var side = (test_lpp[1] < 0) ? 'bottom':'top';
+									var value = Math.abs(test_lpp[1]);
+									captions_container_styles.push(side+':'+value+'%');
+								}
 							}
 						}
 						
@@ -752,10 +759,17 @@ function Playr(v_id, v_el){
 	//this.video.addEventListener('loadedmetadata', function(){ alert('loadeddata') }, false);
 };
 
-window.addEventListener('DOMContentLoaded',function(){
-	var video_tags = document.querySelectorAll('video.playr_video');
-	var video_objects = [];
-	for(v = 0; v < video_tags.length; v++){
-		video_objects.push(new Playr(v, video_tags[v]));
-	}
-}, false);
+var browser_track_support = 'track' in document.createElement('track');
+
+if(!browser_track_support){
+	window.addEventListener('DOMContentLoaded',function(){
+		var video_tags = document.querySelectorAll('video.playr_video');
+		var video_objects = [];
+		for(v = 0; v < video_tags.length; v++){
+			video_objects.push(new Playr(v, video_tags[v]));
+		}
+	}, false);
+}
+else{
+	console.log('Native track support detected, aborting.')
+}
