@@ -38,7 +38,8 @@ Working features:
 * Text position (T:...%)
 * Text alignment (A:start|middle|end)
 * Text size (S:...%)
-* Line position (only L:...%)
+* Vertical text (incompatible with other cue settings)
+* Line position
 * Class tags
 * Cue timestamps tags
 

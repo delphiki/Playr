@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.6.5
+* Basic WebVTT vertical text implementation (incompatible with other cue settings for now)
+
 ### v0.6
 * Updated WebVTT line position implementation according to the spec
 * default track attribute is now working properly
