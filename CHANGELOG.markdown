@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.7
+* Added some accessibility and keyboard controls
+* Updated parser according to the new WebVTT cue settings (still compatible with old ones)
+* Added options to delay subtitles
+
 ### v0.6.5
 * Basic WebVTT vertical text implementation (incompatible with other cue settings for now)
 

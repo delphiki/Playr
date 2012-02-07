@@ -16,7 +16,8 @@ function Playr(v_id, v_el){
 	this.config = {
 		img_dir: './images/',
 		fontSize: '12pt',
-		customFontSize: '12pt'
+		customFontSize: '12pt',
+		defaultVolume: 0.75
 	};
 	
 	this.setupStarted = false;
@@ -27,13 +28,15 @@ function Playr(v_id, v_el){
 	this.captions_refresh = false;
 	this.isFullscreen = false;
 	this.isHoldingTime = false;
-	this.isHoldingVolume = false;	
+	this.isHoldingVolume = false;
+	this.focusedElem = null;
 	this.fsStyle = null;
 	this.fsVideoStyle = null;
 	this.track_tags = [];
 	this.current_track = -1;
 	this.subs = [];
 	this.chapters = [];
+	this.subtitlesDelay = 0;
 		
 	if(typeof Playr.initialized == "undefined"){
 		
@@ -50,6 +53,9 @@ function Playr(v_id, v_el){
 			var newAttr = document.createAttribute('id');
 			newAttr.nodeValue = 'playr_wrapper_'+this.video_id;
 			wrapper.setAttributeNode(newAttr);
+			var newAttr = document.createAttribute('tabindex');
+			newAttr.nodeValue = '0';
+			wrapper.setAttributeNode(newAttr);
 
 			var newAttr = document.createAttribute('id');
 			newAttr.nodeValue = 'playr_video_'+this.video_id;
@@ -61,10 +67,10 @@ function Playr(v_id, v_el){
 				+'<div class="playr_video_container" id="playr_video_container_'+this.video_id+'"></div>'
 				+'<div class="playr_captions" id="playr_captions_'+this.video_id+'"></div>'
 				+'</div>'
-				+'<ul class="playr_controls">'
-				+'<li><a class="playr_play_btn" id="playr_play_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_play.png" id="playr_play_img_'+this.video_id+'" alt="play" /></a></li>'
+				+'<ul class="playr_controls" role="menubar">'
+				+'<li><button class="playr_play_btn" id="playr_play_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_play.png" id="playr_play_img_'+this.video_id+'" alt="play" /></button></li>'
 				+'<li>'
-					+'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'">'
+					+'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">'
 						+'<div class="playr_timebar_buffer" id="playr_timebar_buffer_'+this.video_id+'"></div>'
 						+'<div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'">'
 							+'<div class="playr_timebar_pos"></div>'
@@ -72,13 +78,13 @@ function Playr(v_id, v_el){
 					+'</div>'
 					+'<span class="playr_timebar_notice" id="playr_timebar_notice_'+this.video_id+'">00:00</span>'
 				+'</li>'
-				+'<li><span id="playr_video_curpos_'+this.video_id+'">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
-				+'<li><a class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_sound.png" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></a>'
-					+'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'">'
+				+'<li><span id="playr_video_curpos_'+this.video_id+'" role="timer">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
+				+'<li><button class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_sound.png" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></button>'
+					+'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="'+this.config.defaultVolume+'" tabindex="0">'
 						+'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></div></div></div>'
 					+'</div>'
 				+'</li>'
-				+'<li><a class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'">Menu</a>'
+				+'<li><button class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'" tabindex="0">Menu</button>'
 					+'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
 						+'<li class="playr_menu_title">Subtitles</li>'
 						+'<li class="playr_subtitles_item" id="playr_cc_track_'+this.video_id+'_none">'
@@ -88,7 +94,7 @@ function Playr(v_id, v_el){
 						+'</li>'
 					+'</ul>'
 				+'</li>'
-				+'<li><a class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'"><img src="'+this.config.img_dir+'playr_fullscreen.png" alt="fullscreen" /></a></li>'
+				+'<li><button class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_fullscreen.png" alt="fullscreen" /></button></li>'
 				+'</ul>';
 			wrapper.innerHTML = template;
 
@@ -97,9 +103,9 @@ function Playr(v_id, v_el){
 			document.getElementById('playr_video_container_'+this.video_id).style.height = h+'px';
 			document.getElementById('playr_wrapper_'+this.video_id).style.width = w+'px';
 
-			this.video.volume = 0.75;
-			this.loadTrackTags();
+			this.video.volume = this.config.defaultVolume;
 			this.initEventListeners();
+			this.loadTrackTags();
 			this.ready = true;
 		};
 		
@@ -133,9 +139,11 @@ function Playr(v_id, v_el){
 			
 			document.getElementById('playr_fullscreen_btn_'+this.video_id).addEventListener('click', function(){ that.fullscreen(); }, false);
 			
-			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseover', function(){ that.displayTrackCtrl(); }, false);
-			document.getElementById('playr_captions_btn_'+this.video_id).parentNode.addEventListener('mouseout', function(){ that.displayTrackCtrl(); }, false);
-				
+			// focus handling
+			document.getElementById('playr_wrapper_'+this.video_id).addEventListener('focus', function(){ that.focusedElem = 'playr'; }, false);
+			document.getElementById('playr_play_btn_'+this.video_id).addEventListener('focus', function(){ that.focusedElem = 'play_btn'; }, false);
+			document.getElementById('playr_timebar_'+this.video_id).addEventListener('focus', function(){ that.focusedElem = 'timebar'; }, false);
+
 			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
 			window.addEventListener('resize', function(e){ if(that.isFullscreen) that.updateFullscreen(); }, false);
 		}
@@ -194,6 +202,7 @@ function Playr(v_id, v_el){
 			if(curVol <= 100){
 				document.getElementById('playr_volumebar_inner_'+this.video_id).style.height = curVol.toString()+'%';
 				this.video.volume = curVol / 100;
+				document.getElementById('playr_volume_ctrl_'+this.video_id).setAttribute('aria-valuenow', curVol / 100);
 			}
 		};
 		
@@ -219,6 +228,9 @@ function Playr(v_id, v_el){
 		 * Display the current time code of the video
 		 */		
 		Playr.prototype.timeCode = function(){
+			document.getElementById('playr_timebar_'+this.video_id).setAttribute('aria-valuemax', Math.round(this.video.duration * 100) / 100);
+			document.getElementById('playr_timebar_'+this.video_id).setAttribute('aria-valuenow', this.video.currentTime);
+
 			document.getElementById('playr_video_curpos_'+this.video_id).innerHTML = this.parseTimeCode(this.video.currentTime);
 				
 			if(!isNaN(this.video.duration) && document.getElementById('playr_video_duration_'+this.video_id).innerHTML == '00:00'){
@@ -417,9 +429,9 @@ function Playr(v_id, v_el){
 						that.buildChaptersMenu();
 						that.setDefaultTrack();
 					}
-				 }
+				}
 			};
-			req_track.send(null);		
+			req_track.send(null);
 		};
 		
 		/**
@@ -452,7 +464,7 @@ function Playr(v_id, v_el){
 			else
 				track_list[0].checked = true;
 			this.setActiveTrack();
-		};		
+		};
 		
 		/**
 		 * Highlights the current track
@@ -566,7 +578,8 @@ function Playr(v_id, v_el){
 			
 			if(this.current_track >= 0){
 				for(i=0; i<this.subs[this.current_track].length; i++){
-					if(this.video.currentTime >= this.subs[this.current_track][i].start && this.video.currentTime <= this.subs[this.current_track][i].stop){
+					if((this.video.currentTime + this.subtitlesDelay) >= this.subs[this.current_track][i].start 
+						&& (this.video.currentTime + this.subtitlesDelay) <= this.subs[this.current_track][i].stop){
 
 						var text = this.subs[this.current_track][i].text;
 						var captions_wrapper = document.getElementById('playr_captions_wrapper_'+this.video_id);
@@ -609,11 +622,11 @@ function Playr(v_id, v_el){
 						
 						// if cue settings
 						if(this.subs[this.current_track][i].settings != ''){
-							var text_align = /A:(start|middle|end)/i;
-							var text_size = /S:([0-9]{0,3})%/i;
-							var text_position = /T:([0-9]{0,3})%/i;
-							var vertical_text = /D:(vertical-lr|vertical)/i;
-							var line_position = /L:(-?[0-9]{0,3})(%?)/i;
+							var text_align = /(A|align):(start|middle|end)/i;
+							var text_size = /(S|size):([0-9]{0,3})%/i;
+							var text_position = /(T|position):([0-9]{0,3})%/i;
+							var vertical_text = /(D|vertical):(vertical-lr|vertical|lr|rl)/i;
+							var line_position = /(L|line):(-?[0-9]{0,3})(%?)/i;
 							
 							var test_ta = text_align.exec(this.subs[this.current_track][i].settings);
 							var test_ts = text_size.exec(this.subs[this.current_track][i].settings);
@@ -623,24 +636,24 @@ function Playr(v_id, v_el){
 							
 							// if text align specified
 							if(test_ta){
-								if(test_ta[1] == 'start'){ captions_styles.push('text-align:left') }
-								else if(test_ta[1] == 'middle'){ captions_styles.push('text-align:center') }
-								else if(test_ta[1] == 'end'){ captions_styles.push('text-align:right') }
+								if(test_ta[2] == 'start'){ captions_styles.push('text-align:left') }
+								else if(test_ta[2] == 'middle'){ captions_styles.push('text-align:center') }
+								else if(test_ta[2] == 'end'){ captions_styles.push('text-align:right') }
 							}
 							
 							// if text position specified
-							if(test_tp && test_tp[1] >= 0 && test_tp[1] < 50){
+							if(test_tp && test_tp[2] >= 0 && test_tp[2] < 50){
 								captions_container_styles.push('text-align:left');
 								captions_styles.push('margin-left:'+test_tp[1]+'%');
 							}
-							else if(test_tp && test_tp[1] > 50 && test_tp[1] <= 100){
+							else if(test_tp && test_tp[2] > 50 && test_tp[2] <= 100){
 								captions_container_styles.push('text-align:right');
-								captions_styles.push('margin-right:'+(100-test_tp[1])+'%');
+								captions_styles.push('margin-right:'+(100-test_tp[2])+'%');
 							}
 							
 							// if text size specified
 							if(test_ts){ 
-								var new_font_size = (test_ts[1]/100) * parseInt(this.config.fontSize);
+								var new_font_size = (test_ts[2]/100) * parseInt(this.config.fontSize);
 								captions_styles.push('font-size:'+new_font_size+'pt');
 							}
 							
@@ -649,7 +662,6 @@ function Playr(v_id, v_el){
 								captions_letters_styles.push('display:block');
 								captions_letters_styles.push('min-height:5px');
 								captions_letters_styles.push('min-width:1px');
-								captions_letters_styles.push('font-size:'+this.config.fontSize);
 								text = '<span style="'+captions_letters_styles.join(';')+'">'
 									+text.split('').join('</span><span style="'+captions_letters_styles.join(';')+'">')
 									+'</span>';
@@ -658,7 +670,7 @@ function Playr(v_id, v_el){
 								captions_lines_styles.push('display:block');
 								captions_lines_styles.push('padding:5px');
 								captions_lines_styles.push('text-align:center');
-								if(test_vt[1] == 'vertical-lr'){
+								if(test_vt[2] == 'vertical-lr' || test_vt[2] == 'lr'){
 									captions_lines_styles.push('float:left');
 									captions_styles.push('float:left');
 								}
@@ -677,10 +689,10 @@ function Playr(v_id, v_el){
 							}
 							
 							// if line position specified
-							if(test_lpp && test_lpp[1] >= -100 && test_lpp[1] <= 100){
-								if(test_lpp[2] == '%'){
-									var side = (test_lpp[1] < 0) ? 'bottom':'top';
-									var value = Math.abs(test_lpp[1]);
+							if(test_lpp && test_lpp[2] >= -100 && test_lpp[2] <= 100){
+								if(test_lpp[3] == '%'){
+									var side = (test_lpp[2] < 0) ? 'bottom':'top';
+									var value = Math.abs(test_lpp[2]);
 									captions_container_styles.push(side+':'+value+'%');
 								}
 							}
@@ -717,22 +729,6 @@ function Playr(v_id, v_el){
 		};
 		
 		/**
-		 * Display the track menu
-		 */
-		Playr.prototype.displayTrackCtrl = function(){
-			var menu = document.getElementById('playr_cc_tracks_'+this.video_id);
-			if(menu.style.display == 'block'){
-				menu.style.display = 'none';
-				menu.style.visibility = 'hidden';
-			}
-			else{
-				menu.style.display = 'block';
-				menu.style.marginTop = '-'+(menu.offsetHeight + 26)+'px';
-				menu.style.visibility = 'visible';
-			}
-		};
-		
-		/**
 		 * Reset the video when the end is reached
 		 */
 		Playr.prototype.eventEnded = function(){
@@ -764,14 +760,81 @@ function Playr(v_id, v_el){
 		 */
 		Playr.prototype.keyboard = function(ev){
 			switch(ev.keyCode){
-				case 27:
+				case 27: // escape
 					if(this.isFullscreen){
 						this.fullscreen();
 					}
 				break;
+				case 32: // spacebar
+					this.play();
+				break;
+				case 37: // arrow left
+					if(this.video.currentTime - 5 < 0){
+						this.video.currentTime = 0;	
+					}
+					else{
+						this.video.currentTime -= 5;
+					}
+					ev.preventDefault();
+				break;
+				case 38: // arrow up
+					if(this.video.volume + .1 > 1){
+						this.video.volume = 1;
+					}
+					else{
+						this.video.volume += .1;
+					}
+					ev.preventDefault();
+				break;
+				case 39: // arrow right
+					if(this.video.currentTime + 5 > this.video.duration){
+						this.video.currentTime = this.video.duration;	
+					}
+					else{
+						this.video.currentTime += 5;
+					}
+					ev.preventDefault();
+				break;				
+				case 40: // arrow down
+					if(this.video.volume - .1 < 0){
+						this.video.volume = 0;
+					}
+					else{
+						this.video.volume -= .1;
+					}
+					ev.preventDefault();
+				break;
+				case 67: // c
+					this.subtitlesDelay += 0.5;
+					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
+					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
+					overlay.style.opacity = 1;
+					setTimeout(function(){ overlay.style.opacity = 0;  }, 1000);
+				break;
+				case 68: // d
+					this.subtitlesDelay = 0.0;
+					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
+					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
+					overlay.style.opacity = 1;
+					setTimeout(function(){ overlay.style.opacity = 0; }, 1000);
+				break;
+				case 88: // x
+					this.subtitlesDelay -= 0.5;
+					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
+					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
+					overlay.style.opacity = 1;
+					setTimeout(function(){ overlay.style.opacity = 0; }, 1000);
+				break;
+				case 70: // f
+					this.fullscreen();
+				break;
+				
 			}
 		};
 		
+		/*
+		 * Setup the player
+		 */
 		Playr.prototype.setup = function(){
 			var that = this;
 			

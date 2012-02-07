@@ -122,7 +122,7 @@
 	padding-right:10px;
 }
 
-.playr_controls a{
+.playr_controls a, .playr_controls button{
 	background-color:transparent;
 	border:none;
 	color:#fff;
@@ -134,11 +134,17 @@
 	transition:opacity .3s ease;
 }
 
-.playr_controls a img{
+.playr_controls a img, .playr_controls button img{
 	position:relative;
-	top:4px;	
+	top:4px;
 }
-.playr_controls a:hover{
+
+.playr_controls button:hover, .playr_controls button:focus{
+	cursor:pointer;
+	opacity:1;
+}
+
+.playr_controls a:hover, .playr_controls a:focus{
 	opacity:1;
 }
 
@@ -231,7 +237,10 @@
 	border-radius:8px;
 }
 
-.playr_controls > li:nth-child(4):hover .playr_volume_ctrl, .playr_volume_ctrl:hover{
+.playr_controls > li:nth-child(4):hover .playr_volume_ctrl,
+.playr_volume_ctrl:hover,
+.playr_mute_btn:focus + .playr_volume_ctrl,
+.playr_volume_ctrl:focus{
 	display:block;
 	opacity:1;
 }
@@ -330,10 +339,14 @@
 	display:none;
 }
 
-.playr_controls > li:nth-child(5):hover .playr_cc_tracks, .playr_cc_tracks:hover{
+.playr_controls > li:nth-child(5):hover .playr_cc_tracks, 
+.playr_cc_tracks:hover, 
+.playr_captions_btn:focus + .playr_cc_tracks{
 	opacity:1;
 	display:block;
 	visibility:visible;
+	position:absolute;
+	bottom:30px;
 }
 
 .playr_cc_tracks li{

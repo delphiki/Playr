@@ -2,9 +2,7 @@
 
 ## Compatibility
 
-* Opera
-* Chrome / -Safari-
-* Firefox
+All major browsers.
 
 ## Features
 
@@ -51,6 +49,18 @@ Note on cue timestamps:
 	
 ::cue:past & ::cue:future are remplaced with the CSS classes playr_cue_past & playr_cue_future.
 They're not defined by default. Customize them as you wish.
+
+## Keyboard
+
+* <button>Tab</button> : switch between controls
+* <button>↑</button> : volume up
+* <button>↓</button> : volume down
+* <button>←</button> : rewind
+* <button>→</button> : forward
+* <button>f</button> : toggle fullscreen
+* <button>x</button> : delay subtitles (-500 ms)
+* <button>c</button> : delay subtitles (+500 ms)
+* <button>d</button> : default subtitles sync
 
 ## Demos
 
