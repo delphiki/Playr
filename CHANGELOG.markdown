@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.7.6
+* Fixed video not resizing properly when in true fullscreen mode
+
 ### v0.7.5
 * Added true fullscreen when available (Mozilla & Webkit)
 

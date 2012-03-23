@@ -366,6 +366,7 @@ function Playr(v_id, v_el){
 					wrapper.style.height = '100%';
 					wrapper.style.width = '100%';
 					wrapper.style.backgroundColor = '#000000';
+					this.video.style.width = '100%';
 					this.video.style.height = (screen.height - 30)+'px';
 					document.body.style.overflow = 'hidden';
 				}
