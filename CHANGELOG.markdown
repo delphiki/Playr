@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.7.5
+* Added true fullscreen when available (Mozilla & Webkit)
+
 ### v0.7
 * Added some accessibility and keyboard controls
 * Updated parser according to the new WebVTT cue settings (still compatible with old ones)

@@ -8,6 +8,7 @@ All major browsers.
 
 * Easy integration
 * Multiple [SubRip](http://en.wikipedia.org/wiki/SubRip) / [WebVTT](http://www.delphiki.com/webvtt/) tracks support
+* True fullscreen (Mozilla & Webkit)
 
 ## Notes on local testing
 
@@ -33,9 +34,9 @@ Working features:
 * Track kinds:
 	* subtitles
 	* chapters
-* Text position (T:...%)
-* Text alignment (A:start|middle|end)
-* Text size (S:...%)
+* Text position
+* Text alignment
+* Text size
 * Vertical text (incompatible with other cue settings)
 * Line position
 * Class tags
