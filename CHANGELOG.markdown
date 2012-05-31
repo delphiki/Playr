@@ -8,6 +8,7 @@
 
 ### v0.7.7
 * Images are now embedded as base64 strings
+* Added minified version
 
 ### v0.7.6
 * Fixed video not resizing properly when in true fullscreen mode
