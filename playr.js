@@ -14,11 +14,18 @@
  */
 function Playr(v_id, v_el){
 	this.config = {
-		img_dir: './images/',
 		fontSize: '12pt',
 		customFontSize: '12pt',
 		defaultVolume: 0.75
 	};
+
+	this.base64images = {
+		fullscreen_control: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAAwBQTFRFAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ3bsYwAAAQB0Uk5T////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AFP3ByUAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41Ljg3O4BdAAAAPklEQVQoU7VPSQoAQAiy/z+6UhJmu46X1IIUQaQgCit7iJy9brIvOAbkNOyIwlvPP8b19hHsjL5oFu62e/0CFqTLaX136gAAAAAASUVORK5CYII=',
+		pause_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAABGdBTUEAALGeYUxB9wAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAACgklEQVR42lyR22pbRxSGv5nZZ21H2kqxIrdur+JQ0ppepPEjhIS0F3Gfpn2Y4pbSF+gDlARKIL02hIJTCsanOKmsw97aM7OmF5LlqAsGBr41//rXPyqEwOMnTz978PWDfRExCsVoNGoODn78dTIev7390SZ7e3t3H+49/LZpGq21Vm8vLiY//3Twy3Q6HUUAu7tfPvpuf/+HWV0rEUEk2Jcv/3jz56tXv03GV9y7t/PN/rNn34+urlQIgdba5sWL54fA7xrg7s7Obrfb65dlWRVFp9ocDDY//mR7F6BpagaDwVfdXtXf2Nioik6nunNnOBwOtz4HiBZNTTurZ9R1g/celMLa1rKsZj5v6w+4SMA661YC3nusdVjn8N4TOUeQcP0eEaFt7YprYyAs+FJAsNZinUWWdwk3At57rLM4Z/FeMMYgywEawIvHOodbHvlg+rWDBfNLLiumryc45/DOE4A4jtBK3TgQobUW5xxKKZIkQWu1voKXhbUoMvy/JpMpR3//Q9s0pGmK0nrFIgAFJHGMbVsu370nzeq1DMQL3jkkLPKZzWarNSMAbTTT6ZTziwuMiej3CyJz40QbTZalRMaQJDFlWWKWPAJoW8vVeEye52RpxkZZYsyNTRNp8izHx44sTdd4BGCMpuyUaA1ZltO9dWsti9jEdDoF4j15vuBrDsqyjHu9LlorOkXB7aoiidPoWqDI87jqdhEROkVBv+oRx7FZfeNfr18fpUni8jSVyBh5P/rXHh8fHwNorTk/PztKksRlWSJRZOTy8t389OT0FECFEFBKxdvbn36htYoXmbT25OTkEJgrpTDGpMOtrftaKQNKNU09Pzs7Owwh2P8GAAruVo9cZ9KlAAAAAElFTkSuQmCC',
+		play_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACUklEQVR42mNkAAIOTk4mTU0tdXsHB5sF8+ct//D+/RcGIgEjiFBT1xDz8vJOjImNqezu6qpctXLFjP9AQLQBAUHBup6enmUe7h4x33/8YNixY/v27q7OnKdPntwjygBvX18tV1e3Umdnl4RPnz4BvcTB8Orlq/fTpk2p2Lxx4yyCBnj5+Gk5OTuVOjg4Jnz+/Inh9+8/QBlGBjZWVoajR45snzZlcs7Tp9hdAzbAw9tHy9HRsdTWxi7h0+fPDH/+/mH4/+8fAyMTEwM/Pz/Dl8+f38+YPrVi4/r1s7Ab4OWjZWdnV2ppbZ3w5QskAliYmRlYWFjAmJubm4GPl5dh794929paWkCuuY9igLuHl5aNrW2phZVVwq+fPxlYgU6HY6ABbOxsDBzs7AxioqIMHz58+BQcHOR/4fz5A3AD3KAG2DvYJ/z+BfQ/w3+4F9jYWBm4ODnBrhAVEWEAWRAQ4B9x6tSpDUCFPyEu8PTWsre3L7WysUn48P4DSDvYRm4uLgYeoEYBAX4GPj4+hj179lytqqosuHf37h6MQLS0tCo1MjZJ+P//HwMPUCPIRh4ebgYRYWGGjx8//u7o6JgKTKVN//79e48RiJ7evlrWNjaltra2CUxMjGBb+YE2gmIAZGt1VWXhnTt3duNPB05OpW5ubgnMQH+LiAgzfPr48U87xNZGdFuxJOUQHU9Pj/KAgIAYUPQBo+tqVSVuWzEMUFJWlgoODslKT0+v7uzsmDx37tz6f3//viekGW4ACLCzs3Pz8vLKvHnz5jaQ+48YzSAAAGPF5xGsLhIBAAAAAElFTkSuQmCC',
+		sound_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH0SURBVDjLxdPPS9tgGAfwgH/ATmPD0w5jMFa3IXOMFImsOKnbmCUTacW1WZM2Mf1ho6OBrohkIdJfWm9aLKhM6GF4Lz3No/+AMC/PYQXBXL1+95oxh1jGhsgOX/LywvN5n/fN+3IAuKuEuzagVFoO27b1/Z+BcrnUx4otx7FPLWsJvYpIM2SS9H4PqNWqfK1W8VKplHlW/G1zs4G9vS9YXPx4CaDkXOFES4Om4gceUK2WsbZWR72+gtXVFezsbKHVamF7ewtm/sMFgBJZhd6pvm4kDndaAo2KOmt5Gfv7X9HpdNBut9FsNmFZFgPrMHKZc4DkjHyi6KC3MZNehTOuGAH5Xx5ybK/Y3f0Mx3Fg2zaKxSIMw2DjT0inNQ84nogcUUQJHIfZquNT3hzx46DBALizg2o01qEoCqLRKERRRDAYhKYlWRK/AJdCMwH2BY28+Qk8fg667wdXKJjY2FiHaeaRzWYQCk1AEASGzSCZjP/ewtik5r6eBD0dM+nRSMb1j4LuPDnkFhZymJ/PsmLdazmV0jxEkqKsK+niIQ69mKUBwdd9OAx3SADdHtC53FyK12dVXlVlPpF4zytK7OgMyucNyHLs8m+8+2zJHRwG3fId9LxIbNU+OR6zWU57AR5y84FKN+71//EqM2iapfv/HtPf5gcdtKR8VW88PgAAAABJRU5ErkJggg==',
+		mute_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFsSURBVDjLxZO/SwJhHMYF16b+gP6GZiehwcm7hBORKLXzPT1SIhMUHCKO48TT88emhwchHTiEERQhTrlE1FIhQS1BGRTU5vr0ntgS6BFBDR94eeH5fPk+L68DgOM3OP5MUCjkg7IsPf9YoKoFJw1LiiKPJGkX7wyToCxMFWhayaVpxTHFouqi4ftmU0enc4CTGLEE15T5qYJSSUWtVkW1WkalUkartYd2u43zbBZPPp8lMGeuoKp59Ptn6PV66Ha7MAwDp6KIIcfh1u+3BHMzBXRXmOY+FEWBLMs4FoTx5LtgENuJOGxLtIrS9ToIITADATwyDC69XmzGBYiiYC/I5bJoNOo44vnx5CuWgcftRii0iliMtxek01s4jIRoeBk3dO/URhw+eo7QO0Ii9oIBx+lvLPvxwrKDnfW1JULCD8mkiEwmhWg0PFtAG16kvFIuvtqmU51RPixTRraCicTz/akmohXK8P8+0zQ+AXBHwZp9sfnqAAAAAElFTkSuQmCC'
+	}
 	
 	this.setupStarted = false;
 	this.ready = false;
@@ -69,7 +76,7 @@ function Playr(v_id, v_el){
 				+'<div class="playr_captions" id="playr_captions_'+this.video_id+'"></div>'
 				+'</div>'
 				+'<ul class="playr_controls" role="menubar">'
-				+'<li><button class="playr_play_btn" id="playr_play_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_play.png" id="playr_play_img_'+this.video_id+'" alt="play" /></button></li>'
+				+'<li><button class="playr_play_btn" id="playr_play_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.play_control+'" id="playr_play_img_'+this.video_id+'" alt="play" /></button></li>'
 				+'<li>'
 					+'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">'
 						+'<div class="playr_timebar_buffer" id="playr_timebar_buffer_'+this.video_id+'"></div>'
@@ -80,7 +87,7 @@ function Playr(v_id, v_el){
 					+'<span class="playr_timebar_notice" id="playr_timebar_notice_'+this.video_id+'">00:00</span>'
 				+'</li>'
 				+'<li><span id="playr_video_curpos_'+this.video_id+'" role="timer">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
-				+'<li><button class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_sound.png" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></button>'
+				+'<li><button class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.sound_control+'" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></button>'
 					+'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="'+this.config.defaultVolume+'" tabindex="0">'
 						+'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></div></div></div>'
 					+'</div>'
@@ -95,7 +102,7 @@ function Playr(v_id, v_el){
 						+'</li>'
 					+'</ul>'
 				+'</li>'
-				+'<li><button class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'" tabindex="0"><img src="'+this.config.img_dir+'playr_fullscreen.png" alt="fullscreen" /></button></li>'
+				+'<li><button class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.fullscreen_control+'" alt="fullscreen" /></button></li>'
 				+'</ul>';
 			wrapper.innerHTML = template;
 
@@ -172,11 +179,11 @@ function Playr(v_id, v_el){
 		 */
 		Playr.prototype.playEvent = function(){
 			if(this.video.paused){
-				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_play.png';
+				document.getElementById('playr_play_img_'+this.video_id).src = this.base64images.play_control;
 				document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
 			}
 			else{
-				document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_pause.png';
+				document.getElementById('playr_play_img_'+this.video_id).src = this.base64images.pause_control;
 				document.getElementById('playr_play_img_'+this.video_id).alt = 'pause';
 			}
 		}
@@ -220,11 +227,11 @@ function Playr(v_id, v_el){
 			}
 			
 			if(this.video.muted){
-				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound_mute.png';
+				document.getElementById('playr_mute_icon_'+this.video_id).src = this.base64images.mute_control;
 				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'unmute';
 			}
 			else{
-				document.getElementById('playr_mute_icon_'+this.video_id).src = this.config.img_dir+'playr_sound.png';
+				document.getElementById('playr_mute_icon_'+this.video_id).src = this.base64images.sound_control;
 				document.getElementById('playr_mute_icon_'+this.video_id).alt = 'mute';
 			}
 		};
@@ -784,7 +791,7 @@ function Playr(v_id, v_el){
 		Playr.prototype.eventEnded = function(){
 			this.video.currentTime = 0;
 			this.video.pause();
-			document.getElementById('playr_play_img_'+this.video_id).src = this.config.img_dir+'playr_play.png';
+			document.getElementById('playr_play_img_'+this.video_id).src = this.base64images.play_control;
 			document.getElementById('playr_play_img_'+this.video_id).alt = 'play';
 		};
 		

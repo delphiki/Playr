@@ -1,5 +1,9 @@
 # Playr: yet another HTML5 &lt;video&gt; player
 
+## License
+
+GNU GPL
+
 ## Compatibility
 
 All major browsers.
