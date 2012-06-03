@@ -1,10 +1,12 @@
 #### Known issues
 * Volume control not working in Opera if there's more than one video on the same "line"
-* Playr not displaying properly on IE9+
 
 #### TODO
 * Fix issues above
 * Add a Flash fallback
+
+### v0.8
+* Fixed IE9+ not displaying Playr properly
 
 ### v0.7.7
 * Images are now embedded as base64 strings

@@ -54,6 +54,9 @@ function Playr(v_id, v_el){
 			var w = this.video.offsetWidth;
 			var h = this.video.offsetHeight;
 			
+			console.log('width : '+w);
+			console.log('height : '+h);
+
 			var wrapper = document.createElement('div');
 			var newAttr = document.createAttribute('class');
 			newAttr.nodeValue = 'playr_wrapper';
@@ -895,16 +898,12 @@ function Playr(v_id, v_el){
 		Playr.prototype.setup = function(){
 			var that = this;
 			
-			this.video.addEventListener('durationchange', function(){
-				if(!that.ready && !that.setupStarted) that.init();
-			}, false);
-
 			this.video.addEventListener('loadeddata', function(){
 				if(!that.ready && !that.setupStarted) that.init();
 			}, false);
 			
 			this.video.addEventListener('canplay', function(){
-			if(!that.ready && !that.setupStarted) that.init();
+				if(!that.ready && !that.setupStarted) that.init();
 			}, false);
 		};
 		
