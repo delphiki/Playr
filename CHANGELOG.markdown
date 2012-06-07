@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.8.1
+* Controls fade out in fullscreen
+* Added tack kinds 'captions' & 'descriptions' (parsed as subtitles)
+* Fixed <v VoiceName> in WebVTT files causing Playr to crash (thanks @iandevlin for reporting it)
+
 ### v0.8
 * Fixed IE9+ not displaying Playr properly
 

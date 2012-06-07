@@ -85,6 +85,22 @@
 	background: linear-gradient(top, #4c4c4c 0%,#2c2c2c 23%,#1c1c1c 46%,#1c1c1c 69%,#1c1c1c 84%,#131313 100%); /* W3C */
 }
 
+.playr_is_fullscreen .playr_controls{
+	opacity: 0;
+	-moz-opacity: 0;
+	filter:alpha(opacity=0);
+	-o-transition:opacity .3s ease;
+	-webkit-transition:opacity .3s ease;
+	-moz-transition:opacity .3s ease;
+	transition:opacity .3s ease;
+}
+
+.playr_is_fullscreen .playr_controls:hover{
+	opacity: 1;
+	-moz-opacity: 1;
+	filter:alpha(opacity=1);
+}
+
 .playr_controls > li{
 	display:table-cell;
 	text-align:center;
@@ -316,7 +332,7 @@
 	visibility:hidden;
 	opacity:0;
 	color:#fff;
-	min-width:120px;
+	min-width:140px;
 	font-size:0.9em;
 	background-color:#262626;
 	padding:2px;

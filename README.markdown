@@ -2,7 +2,7 @@
 
 ## License
 
-GNU GPL
+GNU GPL 
 
 ## Compatibility
 
@@ -24,8 +24,6 @@ Some browsers disable XMLHttpRequest on local files by default.
 
 ## Usage
 
-Configure your images directory in the playr.js file.
-
 Just add the class name "playr_video" to your video tag:
 
 	<video src="myVideo.ext" class="playr_video">
@@ -38,6 +36,8 @@ Working features:
 
 * Track kinds:
 	* subtitles
+	* captions
+	* descriptions
 	* chapters
 * Text position
 * Text alignment
