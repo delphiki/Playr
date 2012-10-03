@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.8.2
+* Added Opera (v12.10+) true fullscreen support
+* Changed behavior when <track> is natively supported by the browser (UI is kept)
+* Some code refactoring
+
 ### v0.8.1
 * Controls fade out in fullscreen
 * Added tack kinds 'captions' & 'descriptions' (parsed as subtitles)

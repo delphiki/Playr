@@ -16,7 +16,10 @@ function Playr(v_id, v_el){
 	this.config = {
 		fontSize: '12pt',
 		customFontSize: '12pt',
-		defaultVolume: 0.75
+		defaultVolume: 0.75, 
+		skipStep: 5, // fast-forward
+		volumeStep: 0.1,
+		subsDelayStep: 0.5,
 	};
 
 	this.base64images = {
@@ -26,7 +29,8 @@ function Playr(v_id, v_el){
 		sound_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH0SURBVDjLxdPPS9tgGAfwgH/ATmPD0w5jMFa3IXOMFImsOKnbmCUTacW1WZM2Mf1ho6OBrohkIdJfWm9aLKhM6GF4Lz3No/+AMC/PYQXBXL1+95oxh1jGhsgOX/LywvN5n/fN+3IAuKuEuzagVFoO27b1/Z+BcrnUx4otx7FPLWsJvYpIM2SS9H4PqNWqfK1W8VKplHlW/G1zs4G9vS9YXPx4CaDkXOFES4Om4gceUK2WsbZWR72+gtXVFezsbKHVamF7ewtm/sMFgBJZhd6pvm4kDndaAo2KOmt5Gfv7X9HpdNBut9FsNmFZFgPrMHKZc4DkjHyi6KC3MZNehTOuGAH5Xx5ybK/Y3f0Mx3Fg2zaKxSIMw2DjT0inNQ84nogcUUQJHIfZquNT3hzx46DBALizg2o01qEoCqLRKERRRDAYhKYlWRK/AJdCMwH2BY28+Qk8fg667wdXKJjY2FiHaeaRzWYQCk1AEASGzSCZjP/ewtik5r6eBD0dM+nRSMb1j4LuPDnkFhZymJ/PsmLdazmV0jxEkqKsK+niIQ69mKUBwdd9OAx3SADdHtC53FyK12dVXlVlPpF4zytK7OgMyucNyHLs8m+8+2zJHRwG3fId9LxIbNU+OR6zWU57AR5y84FKN+71//EqM2iapfv/HtPf5gcdtKR8VW88PgAAAABJRU5ErkJggg==',
 		mute_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFsSURBVDjLxZO/SwJhHMYF16b+gP6GZiehwcm7hBORKLXzPT1SIhMUHCKO48TT88emhwchHTiEERQhTrlE1FIhQS1BGRTU5vr0ntgS6BFBDR94eeH5fPk+L68DgOM3OP5MUCjkg7IsPf9YoKoFJw1LiiKPJGkX7wyToCxMFWhayaVpxTHFouqi4ftmU0enc4CTGLEE15T5qYJSSUWtVkW1WkalUkartYd2u43zbBZPPp8lMGeuoKp59Ptn6PV66Ha7MAwDp6KIIcfh1u+3BHMzBXRXmOY+FEWBLMs4FoTx5LtgENuJOGxLtIrS9ToIITADATwyDC69XmzGBYiiYC/I5bJoNOo44vnx5CuWgcftRii0iliMtxek01s4jIRoeBk3dO/URhw+eo7QO0Ii9oIBx+lvLPvxwrKDnfW1JULCD8mkiEwmhWg0PFtAG16kvFIuvtqmU51RPixTRraCicTz/akmohXK8P8+0zQ+AXBHwZp9sfnqAAAAAElFTkSuQmCC'
 	}
-	
+
+	this.nativeTrackSupport = 'track' in document.createElement('track');
 	this.setupStarted = false;
 	this.ready = false;
 	this.video_id = v_id;
@@ -119,6 +123,10 @@ function Playr(v_id, v_el){
 			this.ready = true;
 		};
 		
+		Playr.prototype.setNativeTrackSupport = function(nativeSupport){
+			this.nativeTrackSupport = nativeSupport;
+		}
+
 		/**
 		 * Inits most the the event listeners
 		 */		
@@ -356,9 +364,9 @@ function Playr(v_id, v_el){
 					width: this.video.offsetWidth 
 				};
 				
-				if(document.documentElement.requestFullScreen){
+				if(document.documentElement.requestFullscreen){
 					this.isTrueFullscreen = true;
-					document.documentElement.requestFullScreen();
+					document.documentElement.requestFullscreen();
 				}
 				else if(document.documentElement.mozRequestFullScreen){
 					this.isTrueFullscreen = true;
@@ -370,6 +378,7 @@ function Playr(v_id, v_el){
 				}
 				
 				if(this.isTrueFullscreen){
+					console.log('True fullscreen');
 					wrapper.style.position = 'fixed';
 					wrapper.style.top = 0;
 					wrapper.style.left = 0;
@@ -381,6 +390,7 @@ function Playr(v_id, v_el){
 					document.body.style.overflow = 'hidden';
 				}
 				else{
+					console.log('Fake fullscreen');
 					wrapper.style.backgroundColor = '#000000';
 					wrapper.style.position = 'fixed';
 					wrapper.style.top = 0;
@@ -396,8 +406,11 @@ function Playr(v_id, v_el){
 				wrapper.className += (wrapper.className ? ' ' : '')+'playr_is_fullscreen';
 			}
 			else{
-				if(document.cancelFullScreen){
-					document.cancelFullScreen();  
+				if(document.cancelFullscreen){
+					document.cancelFullscreen();  
+				}
+				else if(document.exitFullscreen){
+					document.exitFullscreen();
 				}
 				else if(document.mozCancelFullScreen){
 					document.mozCancelFullScreen();  
@@ -642,6 +655,8 @@ function Playr(v_id, v_el){
 		 * Display the captions on the video (called on timeupdate)
 		 */
 		Playr.prototype.displayCaptions = function(){
+			if(this.nativeTrackSupport) return;
+
 			var captions_div = document.getElementById('playr_captions_'+this.video_id);
 			var playr_cc_choices = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
 			
@@ -844,43 +859,43 @@ function Playr(v_id, v_el){
 					this.play();
 				break;
 				case 37: // arrow left
-					if(this.video.currentTime - 5 < 0){
+					if(this.video.currentTime - this.config.skipStep < 0){
 						this.video.currentTime = 0;	
 					}
 					else{
-						this.video.currentTime -= 5;
+						this.video.currentTime -= this.config.skipStep;
 					}
 					ev.preventDefault();
 				break;
 				case 38: // arrow up
-					if(this.video.volume + .1 > 1){
+					if(this.video.volume + this.config.volumeStep > 1){
 						this.video.volume = 1;
 					}
 					else{
-						this.video.volume += .1;
+						this.video.volume += this.config.volumeStep;
 					}
 					ev.preventDefault();
 				break;
 				case 39: // arrow right
-					if(this.video.currentTime + 5 > this.video.duration){
+					if(this.video.currentTime + this.config.skipStep > this.video.duration){
 						this.video.currentTime = this.video.duration;	
 					}
 					else{
-						this.video.currentTime += 5;
+						this.video.currentTime += this.config.skipStep;
 					}
 					ev.preventDefault();
 				break;				
 				case 40: // arrow down
-					if(this.video.volume - .1 < 0){
+					if(this.video.volume - this.config.volumeStep < 0){
 						this.video.volume = 0;
 					}
 					else{
-						this.video.volume -= .1;
+						this.video.volume -= this.config.volumeStep;
 					}
 					ev.preventDefault();
 				break;
 				case 67: // c
-					this.subtitlesDelay += 0.5;
+					this.subtitlesDelay += this.config.subsDelayStep;
 					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
 					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
 					overlay.style.opacity = 1;
@@ -894,7 +909,7 @@ function Playr(v_id, v_el){
 					setTimeout(function(){ overlay.style.opacity = 0; }, 1000);
 				break;
 				case 88: // x
-					this.subtitlesDelay -= 0.5;
+					this.subtitlesDelay -= this.config.subsDelayStep;
 					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
 					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
 					overlay.style.opacity = 1;
@@ -931,17 +946,10 @@ function Playr(v_id, v_el){
 	this.setup();
 };
 
-var browser_track_support = 'track' in document.createElement('track');
-
-if(!browser_track_support){
-	window.addEventListener('DOMContentLoaded',function(){
-		var video_tags = document.querySelectorAll('video.playr_video');
-		var video_objects = [];
-		for(v = 0; v < video_tags.length; v++){
-			video_objects.push(new Playr(v, video_tags[v]));
-		}
-	}, false);
-}
-else{
-	console.log('Native track support detected, aborting.')
-}
+window.addEventListener('DOMContentLoaded',function(){
+	var video_tags = document.querySelectorAll('video.playr_video');
+	var video_objects = [];
+	for(v = 0; v < video_tags.length; v++){
+		video_objects.push(new Playr(v, video_tags[v]));
+	}
+}, false);
