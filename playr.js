@@ -31,24 +31,24 @@ function Playr(v_id, v_el){
 	}
 
 	this.nativeTrackSupport = 'track' in document.createElement('track');
-	this.setupStarted = false;
-	this.ready = false;
-	this.video_id = v_id;
-	this.video = v_el;
-	this.timecode_refresh = false;
-	this.captions_refresh = false;
-	this.isFullscreen = false;
-	this.isTrueFullscreen = false;
-	this.isHoldingTime = false;
-	this.isHoldingVolume = false;
-	this.focusedElem = null;
-	this.fsStyle = null;
-	this.fsVideoStyle = null;
-	this.track_tags = [];
-	this.current_track = -1;
-	this.subs = [];
-	this.chapters = [];
-	this.subtitlesDelay = 0;
+	this.setupStarted       = false;
+	this.ready              = false;
+	this.video_id           = v_id;
+	this.video              = v_el;
+	this.timecode_refresh   = false;
+	this.captions_refresh   = false;
+	this.isFullscreen       = false;
+	this.isTrueFullscreen   = false;
+	this.isHoldingTime      = false;
+	this.isHoldingVolume    = false;
+	this.focusedElem        = null;
+	this.fsStyle            = null;
+	this.fsVideoStyle       = null;
+	this.track_tags         = [];
+	this.current_track      = -1;
+	this.subs               = [];
+	this.chapters           = [];
+	this.subtitlesDelay     = 0;
 		
 	if(typeof Playr.initialized == "undefined"){
 		
@@ -167,6 +167,8 @@ function Playr(v_id, v_el){
 			document.getElementById('playr_timebar_'+this.video_id).addEventListener('focus', function(){ that.focusedElem = 'timebar'; }, false);
 
 			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
+			document.addEventListener('mousewheel', function(e){ that.scrollHandler(e); }, false);
+			document.addEventListener('DOMMouseScroll', function(e){ that.scrollHandler(e); }, false); // Firefox
 			window.addEventListener('resize', function(e){ if(that.isFullscreen && !that.isTrueFullscreen) that.updateFullscreen(); }, false);
 		}
 			
@@ -176,7 +178,7 @@ function Playr(v_id, v_el){
 		 */		
 		Playr.prototype.play = function(){
 			if(this.video.paused){
-				this.video.play();			
+				this.video.play();
 			}
 			else{
 				this.video.pause();
@@ -364,17 +366,17 @@ function Playr(v_id, v_el){
 					width: this.video.offsetWidth 
 				};
 				
-				if(document.documentElement.requestFullscreen){
+				if(wrapper.requestFullscreen){
 					this.isTrueFullscreen = true;
-					document.documentElement.requestFullscreen();
+					wrapper.requestFullscreen();
 				}
-				else if(document.documentElement.mozRequestFullScreen){
+				else if(wrapper.mozRequestFullScreen){
 					this.isTrueFullscreen = true;
-					document.documentElement.mozRequestFullScreen();
+					wrapper.mozRequestFullScreen();
 				}
-				else if(document.documentElement.webkitRequestFullScreen){
+				else if(wrapper.webkitRequestFullScreen){
 					this.isTrueFullscreen = true;
-					document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);  
+					wrapper.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);  
 				}
 				
 				if(this.isTrueFullscreen){
@@ -843,12 +845,24 @@ function Playr(v_id, v_el){
 			
 			notice.style.marginLeft = (diffx + 3 - notice.offsetWidth / 2)+'px';
 		};
-		
+
+		/**
+		 * Checks if the current playr instance has the focus
+		 */
+		Playr.prototype.playrHasFocus = function(){
+			var aElem_id = document.activeElement.getAttribute('id');
+			var focusRegex = new RegExp('^playr_.+_'+this.video_id+'$');
+			
+			return (focusRegex.test(aElem_id));
+		};
+
 		/**
 		 * Manage the keyboard events
 		 * @param {Event} ev The keyup event
 		 */
 		Playr.prototype.keyboard = function(ev){
+			if(!this.playrHasFocus()) return true;
+
 			switch(ev.keyCode){
 				case 27: // escape
 					if(this.isFullscreen){
@@ -874,6 +888,7 @@ function Playr(v_id, v_el){
 					else{
 						this.video.volume += this.config.volumeStep;
 					}
+					this.notification('Volume: '+Math.round(this.video.volume*100)+'%');
 					ev.preventDefault();
 				break;
 				case 39: // arrow right
@@ -892,28 +907,20 @@ function Playr(v_id, v_el){
 					else{
 						this.video.volume -= this.config.volumeStep;
 					}
+					this.notification('Volume: '+Math.round(this.video.volume*100)+'%');
 					ev.preventDefault();
 				break;
 				case 67: // c
 					this.subtitlesDelay += this.config.subsDelayStep;
-					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
-					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
-					overlay.style.opacity = 1;
-					setTimeout(function(){ overlay.style.opacity = 0;  }, 1000);
+					this.notification('Subtitles delay: '+this.subtitlesDelay+' second(s)');
 				break;
 				case 68: // d
 					this.subtitlesDelay = 0.0;
-					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
-					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
-					overlay.style.opacity = 1;
-					setTimeout(function(){ overlay.style.opacity = 0; }, 1000);
+					this.notification('Subtitles delay: '+this.subtitlesDelay+' second(s)');
 				break;
 				case 88: // x
 					this.subtitlesDelay -= this.config.subsDelayStep;
-					var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
-					overlay.innerHTML = '<span style="font-size:0.7em;">Subtitles delay: '+this.subtitlesDelay+' second(s).</span>';
-					overlay.style.opacity = 1;
-					setTimeout(function(){ overlay.style.opacity = 0; }, 1000);
+					this.notification('Subtitles delay: '+this.subtitlesDelay+' second(s)');
 				break;
 				case 70: // f
 					this.fullscreen();
@@ -921,7 +928,53 @@ function Playr(v_id, v_el){
 				
 			}
 		};
+
+		/**
+		 * Handles mouse wheel events
+		 */
+		Playr.prototype.scrollHandler = function(ev){
+			if(!this.playrHasFocus() || !this.isFullscreen) return true;
+
+			if('wheelDelta' in ev) {
+				rolled = ev.wheelDelta;
+			}
+			else{
+				rolled = -ev.detail;
+			}
+
+			if(rolled < 0){
+				if(this.video.volume - this.config.volumeStep < 0){
+					this.video.volume = 0;
+				}
+				else{
+					this.video.volume -= this.config.volumeStep;
+				}
+			}
+			else if(rolled > 0){
+				if(this.video.volume + this.config.volumeStep > 1){
+					this.video.volume = 1;
+				}
+				else{
+					this.video.volume += this.config.volumeStep;
+				}
+			}
+
+			this.notification('Volume: '+Math.round(this.video.volume*100)+'%');
+
+			return false;
+		};
 		
+		/**
+		 * Displays notifications
+		 */
+		Playr.prototype.notification = function(message, duration){
+			if(!duration) duration = 1000;
+			var overlay = document.getElementById('playr_top_overlay_'+this.video_id);
+			overlay.innerHTML = '<span style="font-size:0.7em;">'+message+'</span>';
+			overlay.style.opacity = 1;
+			setTimeout(function(){ overlay.style.opacity = 0; }, duration);
+		}
+
 		/*
 		 * Setup the player
 		 */

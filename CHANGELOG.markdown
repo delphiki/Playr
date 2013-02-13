@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.8.5
+* Scrolling now affects volume (in fullscreen only)
+* Added basic notification system
+* Better handling of keyboard and mouse events (on focus only)
+
 ### v0.8.2
 * Added Opera (v12.10+) true fullscreen support
 * Changed behavior when <track> is natively supported by the browser (UI is kept)

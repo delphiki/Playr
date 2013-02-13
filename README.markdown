@@ -13,7 +13,7 @@ All major browsers.
 * Easy integration
 * Multiple [SubRip](http://en.wikipedia.org/wiki/SubRip) / [WebVTT](http://www.delphiki.com/webvtt/) tracks support
 * Keyboard accessible
-* True fullscreen (Mozilla & Webkit)
+* True fullscreen
 
 ## Notes on local testing
 
