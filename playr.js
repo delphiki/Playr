@@ -436,6 +436,7 @@ function Playr(v_id, v_el){
 				this.isTrueFullscreen = false;
 				this.isFullscreen = false;
 				wrapper.className = wrapper.className.replace(new RegExp('(\\s|^)playr_is_fullscreen(\\s|$)'),' ').replace(/^\s+|\s+$/g, '');
+				this.progressEvent();
 			}
 			
 			document.getElementById('playr_video_container_'+this.video_id).style.height = this.video.offsetHeight+'px';
@@ -455,6 +456,7 @@ function Playr(v_id, v_el){
 			wrapper.style.marginLeft = '-'+Math.round(wrapper.offsetWidth / 2)+'px';
 			var factor = Math.round((window.innerHeight - 30) / this.fsVideoStyle.height * 100) / 100;
 			document.getElementById('playr_captions_'+this.video_id).style.fontSize = factor + 'em';
+			document.getElementById('playr_video_container_'+this.video_id).style.height = (window.innerHeight-30)+'px';
 		};
 		
 		/**
