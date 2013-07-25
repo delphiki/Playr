@@ -5,6 +5,11 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.9
+* Subtitles menu now works with the native TextTrack API (if supported)
+* Added option to choose between native and Playr's caption rendering
+* Fix autoplay not working
+
 ### v0.8.5
 * Scrolling now affects volume (in fullscreen only)
 * Added basic notification system

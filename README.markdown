@@ -30,6 +30,10 @@ Just add the class name "playr_video" to your video tag:
 		<track kind="subtitles" label="English Subtitles" srclang="en" src="mySubs.srt" /> // optional
 	</video>
 
+You can now force the caption rendering if you prefer to use Playr's rendering over the native one, by adding the following attribute:
+
+	<video ... data-rendering="playr">
+
 ## WebVTT implementation
 
 Working features:

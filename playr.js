@@ -119,12 +119,27 @@ function Playr(v_id, v_el){
 
 			this.video.volume = this.config.defaultVolume;
 			this.initEventListeners();
+
+			var attr = this.video.attributes;
+			for (var i=0; i<attr.length; i++){
+				// autoplay fix
+				if(attr.item(i).nodeName == 'autoplay')
+					this.play();
+
+				// disable native support
+				if(attr.item(i).nodeName == 'data-rendering' && attr.item(i).nodeValue == 'playr')
+					this.setNativeTrackSupport(false);
+			}
+
 			this.loadTrackTags();
 			this.ready = true;
 		};
 		
 		Playr.prototype.setNativeTrackSupport = function(nativeSupport){
 			this.nativeTrackSupport = nativeSupport;
+
+			if(!this.nativeTrackSupport)
+				this.disableNativeTextTracks();
 		}
 
 		/**
@@ -290,7 +305,7 @@ function Playr(v_id, v_el){
 		
 		/**
 		 * Find the global coordinates of the mouse
- 		 * @param {DOMElement} The clicked element
+		 * @param {DOMElement} The clicked element
 		 * @return A object containing the coordinates
 		 */
 		Playr.prototype.findPos = function(el){
@@ -463,14 +478,47 @@ function Playr(v_id, v_el){
 		 * Look up for <track>s
 		 */
 		Playr.prototype.loadTrackTags = function(){
-			this.track_tags = this.video.getElementsByTagName('track');
-			for(i = 0; i < this.track_tags.length; i++){
-				var newAttr = document.createAttribute('id');
-				newAttr.nodeValue = 'playr_track_'+this.video_id+'_'+i;
-				this.track_tags[i].setAttributeNode(newAttr);
+			if(this.nativeTrackSupport){
+				for(var i=0; i < this.video.textTracks.length; i++){
+					t = this.video.textTracks[i];
+
+					if(t.kind == 'subtitles' || t.kind == 'captions' || t.kind == 'descriptions'){
+						if(t.label != null) track_label = t.label;
+						else if(t.lang != null) track_label = t.lang;
+						else track_label = 'Track '+ (i+1);
+
+						var str = '<li class="playr_subtitles_item">'
+								+'<label for="playr_current_cc_'+this.video_id+'_'+i+'">'
+								+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_'+i+'" value="'+i+'" '
+									+(t.mode=="showing" ? 'checked="checked"' : '')
+								+' /> '
+								+track_label
+							+'</label></li>';
+						document.getElementById('playr_cc_tracks_'+this.video_id).innerHTML += str;
+
+						this.setActiveTrack();
+					}
+				}
+				var track_list = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
+				var that = this;
+				for(i = 0; i < track_list.length; i++){
+					track_list[i].addEventListener('change', function(){
+						that.setActiveTrack();
+					},false);
+				}
+
+				this.setDefaultTrack();
 			}
-			if(this.track_tags.length > 0)
-				this.loadTrackContent(0);
+			else{
+				this.track_tags = this.video.getElementsByTagName('track');
+				for(i = 0; i < this.track_tags.length; i++){
+					var newAttr = document.createAttribute('id');
+					newAttr.nodeValue = 'playr_track_'+this.video_id+'_'+i;
+					this.track_tags[i].setAttributeNode(newAttr);
+				}
+				if(this.track_tags.length > 0)
+					this.loadTrackContent(0);
+			}
 		};
 		
 		/**
@@ -554,15 +602,34 @@ function Playr(v_id, v_el){
 		Playr.prototype.setActiveTrack = function(){
 			var track_li = document.querySelectorAll('#playr_cc_tracks_'+this.video_id+' li.playr_subtitles_item');
 			var track_inputs = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
+
+			this.disableNativeTextTracks();
+
 			for(i = 0; i < track_inputs.length; i++){
 				if(track_inputs[i].checked){
 					track_li[i].className = 'playr_subtitles_item active_track';
+
+					if(this.nativeTrackSupport && track_inputs[i].value >= 0){
+						this.video.textTracks[track_inputs[i].value].mode = 'showing';
+					}
 				}
-				else
+				else{
+					track_inputs[i].checked = null;
 					track_li[i].className = 'playr_subtitles_item';
+				}
 			}
 		}
 			
+		/**
+		 * Disables native text tracks
+		 */
+		Playr.prototype.disableNativeTextTracks = function(){
+			if(this.nativeTrackSupport){
+				for(i = 0; i < this.video.textTracks.length; i++)
+					this.video.textTracks[i].mode = 'disabled';
+			}
+		}
+
 		/** 
 		 * Convert MM:SS into seconds
 		 * @param {String} timecode A string with the format: MM:SS
@@ -609,21 +676,21 @@ function Playr(v_id, v_el){
 							'settings': timecode[3]
 						});
 					}
-	    		}
-  			}
+				}
+			}
 
-  			switch(track_kind){
-  				case 'chapters':
-  					this.chapters.push(entries);
-  					break;
-  				case 'subtitles':
-  				case 'captions':
-  				case 'descriptions':
-  				default:
-  					this.subs.push(entries);
-  					break;
-  			}
-  		};
+			switch(track_kind){
+				case 'chapters':
+					this.chapters.push(entries);
+					break;
+				case 'subtitles':
+				case 'captions':
+				case 'descriptions':
+				default:
+					this.subs.push(entries);
+					break;
+			}
+		};
 		
 		/**
 		 * Builds the chapters menu
