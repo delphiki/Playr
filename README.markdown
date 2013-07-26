@@ -2,7 +2,7 @@
 
 ## License
 
-GNU GPL 
+MIT License 
 
 ## Compatibility
 

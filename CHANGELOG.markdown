@@ -5,6 +5,9 @@
 * Fix issues above
 * Add a Flash fallback
 
+### v0.9.1
+* Now under MIT License (formerly GNU GPL)
+
 ### v0.9
 * Subtitles menu now works with the native TextTrack API (if supported)
 * Added option to choose between native and Playr's caption rendering
