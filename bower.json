@@ -1,0 +1,21 @@
+{
+  "name": "playr",
+  "main": [
+    "playr.js",
+    "playr.css"
+  ],
+  "version": "0.9.1",
+  "homepage": "https://github.com/delphiki/Playr",
+  "authors": [
+    "Julien 'delphiki' Villetorte <gdelphiki@gmail.com>"
+  ],
+  "description": "Yet another HTML5 <video> player. WebVTT support!",
+  "keywords": [
+    "webvtt",
+    "playr"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*"
+  ]
+}
