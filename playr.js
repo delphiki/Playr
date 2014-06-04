@@ -12,11 +12,14 @@
  * @param {Integer} v_id A video id
  * @param {DOMElement} v_el The video node
  */
+
+/* jshint strict:false */
+
 function Playr(v_id, v_el){
 	this.config = {
 		fontSize: '12pt',
 		customFontSize: '12pt',
-		defaultVolume: 0.75, 
+		defaultVolume: 0.75,
 		skipStep: 5, // fast-forward
 		volumeStep: 0.1,
 		subsDelayStep: 0.5,
@@ -28,7 +31,7 @@ function Playr(v_id, v_el){
 		play_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACUklEQVR42mNkAAIOTk4mTU0tdXsHB5sF8+ct//D+/RcGIgEjiFBT1xDz8vJOjImNqezu6qpctXLFjP9AQLQBAUHBup6enmUe7h4x33/8YNixY/v27q7OnKdPntwjygBvX18tV1e3Umdnl4RPnz4BvcTB8Orlq/fTpk2p2Lxx4yyCBnj5+Gk5OTuVOjg4Jnz+/Inh9+8/QBlGBjZWVoajR45snzZlcs7Tp9hdAzbAw9tHy9HRsdTWxi7h0+fPDH/+/mH4/+8fAyMTEwM/Pz/Dl8+f38+YPrVi4/r1s7Ab4OWjZWdnV2ppbZ3w5QskAliYmRlYWFjAmJubm4GPl5dh794929paWkCuuY9igLuHl5aNrW2phZVVwq+fPxlYgU6HY6ABbOxsDBzs7AxioqIMHz58+BQcHOR/4fz5A3AD3KAG2DvYJ/z+BfQ/w3+4F9jYWBm4ODnBrhAVEWEAWRAQ4B9x6tSpDUCFPyEu8PTWsre3L7WysUn48P4DSDvYRm4uLgYeoEYBAX4GPj4+hj179lytqqosuHf37h6MQLS0tCo1MjZJ+P//HwMPUCPIRh4ebgYRYWGGjx8//u7o6JgKTKVN//79e48RiJ7evlrWNjaltra2CUxMjGBb+YE2gmIAZGt1VWXhnTt3duNPB05OpW5ubgnMQH+LiAgzfPr48U87xNZGdFuxJOUQHU9Pj/KAgIAYUPQBo+tqVSVuWzEMUFJWlgoODslKT0+v7uzsmDx37tz6f3//viekGW4ACLCzs3Pz8vLKvHnz5jaQ+48YzSAAAGPF5xGsLhIBAAAAAElFTkSuQmCC',
 		sound_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH0SURBVDjLxdPPS9tgGAfwgH/ATmPD0w5jMFa3IXOMFImsOKnbmCUTacW1WZM2Mf1ho6OBrohkIdJfWm9aLKhM6GF4Lz3No/+AMC/PYQXBXL1+95oxh1jGhsgOX/LywvN5n/fN+3IAuKuEuzagVFoO27b1/Z+BcrnUx4otx7FPLWsJvYpIM2SS9H4PqNWqfK1W8VKplHlW/G1zs4G9vS9YXPx4CaDkXOFES4Om4gceUK2WsbZWR72+gtXVFezsbKHVamF7ewtm/sMFgBJZhd6pvm4kDndaAo2KOmt5Gfv7X9HpdNBut9FsNmFZFgPrMHKZc4DkjHyi6KC3MZNehTOuGAH5Xx5ybK/Y3f0Mx3Fg2zaKxSIMw2DjT0inNQ84nogcUUQJHIfZquNT3hzx46DBALizg2o01qEoCqLRKERRRDAYhKYlWRK/AJdCMwH2BY28+Qk8fg667wdXKJjY2FiHaeaRzWYQCk1AEASGzSCZjP/ewtik5r6eBD0dM+nRSMb1j4LuPDnkFhZymJ/PsmLdazmV0jxEkqKsK+niIQ69mKUBwdd9OAx3SADdHtC53FyK12dVXlVlPpF4zytK7OgMyucNyHLs8m+8+2zJHRwG3fId9LxIbNU+OR6zWU57AR5y84FKN+71//EqM2iapfv/HtPf5gcdtKR8VW88PgAAAABJRU5ErkJggg==',
 		mute_control:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFsSURBVDjLxZO/SwJhHMYF16b+gP6GZiehwcm7hBORKLXzPT1SIhMUHCKO48TT88emhwchHTiEERQhTrlE1FIhQS1BGRTU5vr0ntgS6BFBDR94eeH5fPk+L68DgOM3OP5MUCjkg7IsPf9YoKoFJw1LiiKPJGkX7wyToCxMFWhayaVpxTHFouqi4ftmU0enc4CTGLEE15T5qYJSSUWtVkW1WkalUkartYd2u43zbBZPPp8lMGeuoKp59Ptn6PV66Ha7MAwDp6KIIcfh1u+3BHMzBXRXmOY+FEWBLMs4FoTx5LtgENuJOGxLtIrS9ToIITADATwyDC69XmzGBYiiYC/I5bJoNOo44vnx5CuWgcftRii0iliMtxek01s4jIRoeBk3dO/URhw+eo7QO0Ii9oIBx+lvLPvxwrKDnfW1JULCD8mkiEwmhWg0PFtAG16kvFIuvtqmU51RPixTRraCicTz/akmohXK8P8+0zQ+AXBHwZp9sfnqAAAAAElFTkSuQmCC'
-	}
+	};
 
 	this.nativeTrackSupport = 'track' in document.createElement('track');
 	this.setupStarted       = false;
@@ -50,7 +53,7 @@ function Playr(v_id, v_el){
 	this.chapters           = [];
 	this.subtitlesDelay     = 0;
 		
-	if(typeof Playr.initialized == "undefined"){
+	if(typeof Playr.initialized == 'undefined'){
 		
 		Playr.prototype.init = function(){
 			if(this.ready || this.setupStarted) return;
@@ -64,52 +67,52 @@ function Playr(v_id, v_el){
 			var newAttr = document.createAttribute('class');
 			newAttr.nodeValue = 'playr_wrapper';
 			wrapper.setAttributeNode(newAttr);
-			var newAttr = document.createAttribute('id');
+			newAttr = document.createAttribute('id');
 			newAttr.nodeValue = 'playr_wrapper_'+this.video_id;
 			wrapper.setAttributeNode(newAttr);
-			var newAttr = document.createAttribute('tabindex');
+			newAttr = document.createAttribute('tabindex');
 			newAttr.nodeValue = '0';
 			wrapper.setAttributeNode(newAttr);
 
-			var newAttr = document.createAttribute('id');
+			newAttr = document.createAttribute('id');
 			newAttr.nodeValue = 'playr_video_'+this.video_id;
 			this.video.setAttributeNode(newAttr);
 			this.video.removeAttribute('controls');
 
-			var template = '<div class="playr_captions_wrapper" id="playr_captions_wrapper_'+this.video_id+'">'
-				+'<div class="playr_top_overlay" id="playr_top_overlay_'+this.video_id+'"><a href="http://www.delphiki.com/html5/playr/">Playr</a></div>'
-				+'<div class="playr_video_container" id="playr_video_container_'+this.video_id+'"></div>'
-				+'<div class="playr_captions" id="playr_captions_'+this.video_id+'"></div>'
-				+'</div>'
-				+'<ul class="playr_controls" id="playr_controls_'+this.video_id+'" role="menubar">'
-				+'<li><button class="playr_play_btn" id="playr_play_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.play_control+'" id="playr_play_img_'+this.video_id+'" alt="play" /></button></li>'
-				+'<li>'
-					+'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">'
-						+'<div class="playr_timebar_buffer" id="playr_timebar_buffer_'+this.video_id+'"></div>'
-						+'<div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'">'
-							+'<div class="playr_timebar_pos"></div>'
-						+'</div>'
-					+'</div>'
-					+'<span class="playr_timebar_notice" id="playr_timebar_notice_'+this.video_id+'">00:00</span>'
-				+'</li>'
-				+'<li><span id="playr_video_curpos_'+this.video_id+'" role="timer">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'
-				+'<li><button class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.sound_control+'" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></button>'
-					+'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="'+this.config.defaultVolume+'" tabindex="0">'
-						+'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></div></div></div>'
-					+'</div>'
-				+'</li>'
-				+'<li><button class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'" tabindex="0">Menu</button>'
-					+'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'
-						+'<li class="playr_menu_title">Subtitles &amp; Captions</li>'
-						+'<li class="playr_subtitles_item" id="playr_cc_track_'+this.video_id+'_none">'
-							+'<label for="playr_current_cc_'+this.video_id+'_none">'
-							+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" />'
-							+' None</label>'
-						+'</li>'
-					+'</ul>'
-				+'</li>'
-				+'<li><button class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.fullscreen_control+'" alt="fullscreen" /></button></li>'
-				+'</ul>';
+			var template = '<div class="playr_captions_wrapper" id="playr_captions_wrapper_'+this.video_id+'">'+
+				'<div class="playr_top_overlay" id="playr_top_overlay_'+this.video_id+'"><a href="http://www.delphiki.com/html5/playr/">Playr</a></div>'+
+				'<div class="playr_video_container" id="playr_video_container_'+this.video_id+'"></div>'+
+				'<div class="playr_captions" id="playr_captions_'+this.video_id+'"></div>'+
+				'</div>'+
+				'<ul class="playr_controls" id="playr_controls_'+this.video_id+'" role="menubar">'+
+				'<li><button class="playr_play_btn" id="playr_play_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.play_control+'" id="playr_play_img_'+this.video_id+'" alt="play" /></button></li>'+
+				'<li>'+
+					'<div class="playr_timebar" id="playr_timebar_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">'+
+						'<div class="playr_timebar_buffer" id="playr_timebar_buffer_'+this.video_id+'"></div>'+
+						'<div class="playr_timebar_inner" id="playr_timebar_inner_'+this.video_id+'">'+
+							'<div class="playr_timebar_pos"></div>'+
+						'</div>'+
+					'</div>'+
+					'<span class="playr_timebar_notice" id="playr_timebar_notice_'+this.video_id+'">00:00</span>'+
+				'</li>'+
+				'<li><span id="playr_video_curpos_'+this.video_id+'" role="timer">00:00</span> / <span id="playr_video_duration_'+this.video_id+'">00:00</span></li>'+
+				'<li><button class="playr_mute_btn" id="playr_mute_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.sound_control+'" class="playr_mute_icon" id="playr_mute_icon_'+this.video_id+'" alt="mute" /></button>'+
+					'<div class="playr_volume_ctrl" id="playr_volume_ctrl_'+this.video_id+'" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="'+this.config.defaultVolume+'" +tabindex="0">'+
+						'<div class="playr_volumebar" id="playr_volumebar_'+this.video_id+'"><div class="playr_volumebar_inner" id="playr_volumebar_inner_'+this.video_id+'"><div class="playr_volumebar_pos"></+div></div></div>'+
+					'</div>'+
+				'</li>'+
+				'<li><button class="playr_captions_btn" id="playr_captions_btn_'+this.video_id+'" tabindex="0">Menu</button>'+
+					'<ul class="playr_cc_tracks" id="playr_cc_tracks_'+this.video_id+'">'+
+						'<li class="playr_menu_title">Subtitles &amp; Captions</li>'+
+						'<li class="playr_subtitles_item" id="playr_cc_track_'+this.video_id+'_none">'+
+							'<label for="playr_current_cc_'+this.video_id+'_none">'+
+							'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_none" value="-1" />'+
+							' None</label>'+
+						'</li>'+
+					'</ul>'+
+				'</li>'+
+				'<li><button class="playr_fullscreen_btn" id="playr_fullscreen_btn_'+this.video_id+'" tabindex="0"><img src="'+this.base64images.fullscreen_control+'" alt="fullscreen" /></button></li>'+
+				'</ul>';
 			wrapper.innerHTML = template;
 
 			this.video.parentNode.insertBefore(wrapper,this.video);
@@ -140,11 +143,11 @@ function Playr(v_id, v_el){
 
 			if(!this.nativeTrackSupport)
 				this.disableNativeTextTracks();
-		}
+		};
 
 		/**
 		 * Inits most the the event listeners
-		 */		
+		 */
 		Playr.prototype.initEventListeners = function(){
 			var that = this;
 			
@@ -158,20 +161,20 @@ function Playr(v_id, v_el){
 			this.video.addEventListener('progress', function(){ that.progressEvent(); }, false);
 			
 			// true fullscreen
-			document.addEventListener("mozfullscreenchange",function(){ if(!document.mozFullScreen && that.isTrueFullscreen){that.fullscreen();} }, false);
-			document.addEventListener("webkitfullscreenchange",function(){ if(!document.webkitIsFullScreen && that.isTrueFullscreen){that.fullscreen();} }, false);
+			document.addEventListener('mozfullscreenchange',function(){ if(!document.mozFullScreen && that.isTrueFullscreen){that.fullscreen();} }, false);
+			document.addEventListener('webkitfullscreenchange',function(){ if(!document.webkitIsFullScreen && that.isTrueFullscreen){that.fullscreen();} }, false);
 
 			document.getElementById('playr_play_btn_'+this.video_id).addEventListener('click', function(){ that.play(); }, false);
 			
 			// timebar events
 			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingTime = true; }, false);
 			document.getElementById('playr_timebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingTime = false; that.setPosition(e, true); }, false);
-			document.getElementById('playr_timebar_'+this.video_id).parentNode.addEventListener('mousemove', function(e){ that.noticeTimecode(e); if(that.isHoldingTime){that.setPosition(e, false);}; }, false);
+			document.getElementById('playr_timebar_'+this.video_id).parentNode.addEventListener('mousemove', function(e){ that.noticeTimecode(e); if(that.isHoldingTime){that.setPosition(e, false);} }, false);
 			
 			// volume control events
 			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousedown', function(){ that.isHoldingVolume = true; }, false);
 			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mouseup', function(e){ that.isHoldingVolume = false; that.setVolume(e); }, false);
-			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousemove', function(e){ if(that.isHoldingVolume){that.setVolume(e);}; }, false);
+			document.getElementById('playr_volumebar_'+this.video_id).addEventListener('mousemove', function(e){ if(that.isHoldingVolume){that.setVolume(e);} }, false);
 			document.getElementById('playr_mute_btn_'+this.video_id).addEventListener('click', function(){ that.toggleMute(); }, false);
 			
 			document.getElementById('playr_fullscreen_btn_'+this.video_id).addEventListener('click', function(){ that.fullscreen(); }, false);
@@ -184,13 +187,13 @@ function Playr(v_id, v_el){
 			document.addEventListener('keydown', function(e){ that.keyboard(e); }, false);
 			document.addEventListener('mousewheel', function(e){ that.scrollHandler(e); }, false);
 			document.addEventListener('DOMMouseScroll', function(e){ that.scrollHandler(e); }, false); // Firefox
-			window.addEventListener('resize', function(e){ if(that.isFullscreen && !that.isTrueFullscreen) that.updateFullscreen(); }, false);
-		}
+			window.addEventListener('resize', function(){ if(that.isFullscreen && !that.isTrueFullscreen) that.updateFullscreen(); }, false);
+		};
 			
 		/**
 		 * Toggle play / pause (+ change the play button icon) 
 		 * @return false to prevent default
-		 */		
+		 */
 		Playr.prototype.play = function(){
 			if(this.video.paused){
 				this.video.play();
@@ -213,7 +216,7 @@ function Playr(v_id, v_el){
 				document.getElementById('playr_play_img_'+this.video_id).src = this.base64images.pause_control;
 				document.getElementById('playr_play_img_'+this.video_id).alt = 'pause';
 			}
-		}
+		};
 		
 		/**
 		 * Toggle Mute (+ changes the mute icon)
@@ -265,7 +268,7 @@ function Playr(v_id, v_el){
 		
 		/**
 		 * Display the current time code of the video
-		 */		
+		 */
 		Playr.prototype.timeCode = function(){
 			document.getElementById('playr_timebar_'+this.video_id).setAttribute('aria-valuemax', Math.round(this.video.duration * 100) / 100);
 			document.getElementById('playr_timebar_'+this.video_id).setAttribute('aria-valuenow', this.video.currentTime);
@@ -299,7 +302,7 @@ function Playr(v_id, v_el){
 			var min = nb_min.toString();
 			if(min.length==1){
 				min = '0'+min;
-			}	
+			}
 			return min+':'+sec;
 		};
 		
@@ -309,14 +312,14 @@ function Playr(v_id, v_el){
 		 * @return A object containing the coordinates
 		 */
 		Playr.prototype.findPos = function(el){
-			var x = y = 0;
+			var x = 0, y = 0;
 			if(el.offsetParent){
 				do {
 					x += el.offsetLeft;
 					y += el.offsetTop;
-				}while(el = el.offsetParent);					
+				} while (el = el.offsetParent);
 			}
-			return {x:x,y:y};
+			return { x: x, y: y };
 		};
 		
 		/**
@@ -339,17 +342,19 @@ function Playr(v_id, v_el){
 		 * Updates the progress bar (buffered video)
 		 */
 		Playr.prototype.progressEvent = function(){
-			if(this.video.buffered.length == 0)
+			if(this.video.buffered.length === 0)
 				return;
 			
 			var that = this;
 			var buff = {
 				start: that.video.buffered.start(0),
 				end:  that.video.buffered.end(0)
-			}
+			};
 			
-			if(buff.end == that.video.duration){
+			if(Math.round(buff.end*1000) / 1000 >= that.video.duration){
 				document.getElementById('playr_timebar_buffer_'+this.video_id).style.width = (document.getElementById('playr_timebar_'+this.video_id).offsetWidth - 2)  + 'px';
+
+				console.log(document.getElementById('playr_timebar_'+this.video_id).offsetWidth);
 			}
 			else{
 				var bar_width = document.getElementById('playr_timebar_'+this.video_id).offsetWidth;
@@ -365,20 +370,19 @@ function Playr(v_id, v_el){
 		Playr.prototype.fullscreen = function(){
 			var vids = document.querySelectorAll('.playr_wrapper');
 			var wrapper = document.getElementById('playr_wrapper_'+this.video_id);
-			var captions = document.getElementById('playr_captions_'+this.video_id);
-			
+						
 			if(!this.isFullscreen){
-				for(i = 0; i<vids.length; i++)
+				for(var i = 0; i < vids.length; i++)
 					vids[i].style.visibility = 'hidden';
 				wrapper.style.visibility = 'visible';
 				
-				this.fsStyle = { 
-					height: wrapper.style.height, 
-					width: wrapper.style.width 
+				this.fsStyle = {
+					height: wrapper.style.height,
+					width: wrapper.style.width
 				};
-				this.fsVideoStyle = { 
+				this.fsVideoStyle = {
 					height: this.video.offsetHeight,
-					width: this.video.offsetWidth 
+					width: this.video.offsetWidth
 				};
 				
 				if(wrapper.requestFullscreen){
@@ -391,7 +395,7 @@ function Playr(v_id, v_el){
 				}
 				else if(wrapper.webkitRequestFullScreen){
 					this.isTrueFullscreen = true;
-					wrapper.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);  
+					wrapper.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
 				}
 				
 				if(this.isTrueFullscreen){
@@ -424,20 +428,21 @@ function Playr(v_id, v_el){
 			}
 			else{
 				if(document.cancelFullscreen){
-					document.cancelFullscreen();  
+					document.cancelFullscreen();
 				}
 				else if(document.exitFullscreen){
 					document.exitFullscreen();
 				}
 				else if(document.mozCancelFullScreen){
-					document.mozCancelFullScreen();  
+					document.mozCancelFullScreen();
 				}
 				else if(document.webkitCancelFullScreen){
 					document.webkitCancelFullScreen();
 				}
 				
-				for(i = 0; i<vids.length; i++)
-					vids[i].style.visibility = 'visible';
+				for(var j = 0; j < vids.length; j++)
+					vids[j].style.visibility = 'visible';
+
 				wrapper.style.backgroundColor = 'transparent';
 				wrapper.style.position = 'inherit';
 				wrapper.style.height = this.fsStyle.height;
@@ -477,23 +482,23 @@ function Playr(v_id, v_el){
 		/**
 		 * Look up for <track>s
 		 */
-		Playr.prototype.loadTrackTags = function(){
-			if(this.nativeTrackSupport){
-				for(var i=0; i < this.video.textTracks.length; i++){
-					t = this.video.textTracks[i];
+		Playr.prototype.loadTrackTags = function() {
+			if (this.nativeTrackSupport) {
+				for (var i = 0; i < this.video.textTracks.length; i++) {
+					var t = this.video.textTracks[i], track_label;
 
-					if(t.kind == 'subtitles' || t.kind == 'captions' || t.kind == 'descriptions'){
-						if(t.label != null) track_label = t.label;
-						else if(t.lang != null) track_label = t.lang;
+					if (['subtitles', 'captions', 'descriptions'].indexOf(t.kind) != -1) {
+						if (t.label !== null) track_label = t.label;
+						else if (t.lang !== null) track_label = t.lang;
 						else track_label = 'Track '+ (i+1);
 
-						var str = '<li class="playr_subtitles_item">'
-								+'<label for="playr_current_cc_'+this.video_id+'_'+i+'">'
-								+'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_'+i+'" value="'+i+'" '
-									+(t.mode=="showing" ? 'checked="checked"' : '')
-								+' /> '
-								+track_label
-							+'</label></li>';
+						var str = '<li class="playr_subtitles_item">'+
+								'<label for="playr_current_cc_'+this.video_id+'_'+i+'">'+
+								'<input type="radio" name="playr_current_cc_'+this.video_id+'" id="playr_current_cc_'+this.video_id+'_'+i+'" value="'+i+'" '+
+									(t.mode == 'showing' ? 'checked="checked"' : '')+
+								' /> '+
+								track_label+
+							'</label></li>';
 						document.getElementById('playr_cc_tracks_'+this.video_id).innerHTML += str;
 
 						this.setActiveTrack();
@@ -504,20 +509,21 @@ function Playr(v_id, v_el){
 				for(i = 0; i < track_list.length; i++){
 					track_list[i].addEventListener('change', function(){
 						that.setActiveTrack();
-					},false);
+					}, false);
 				}
 
 				this.setDefaultTrack();
 			}
-			else{
+			else {
 				this.track_tags = this.video.getElementsByTagName('track');
-				for(i = 0; i < this.track_tags.length; i++){
+				for (var i = 0; i < this.track_tags.length; i++) {
 					var newAttr = document.createAttribute('id');
 					newAttr.nodeValue = 'playr_track_'+this.video_id+'_'+i;
 					this.track_tags[i].setAttributeNode(newAttr);
 				}
-				if(this.track_tags.length > 0)
+				if (this.track_tags.length > 0) {
 					this.loadTrackContent(0);
+				}
 			}
 		};
 		
@@ -527,27 +533,31 @@ function Playr(v_id, v_el){
 		 */
 		Playr.prototype.loadTrackContent = function(track){
 			var that = this;
-			var curTrack = that.track_tags[track];
+			var curTrack = that.track_tags[track], track_label;
+			
 			var req_track = new XMLHttpRequest();
 			req_track.open('GET', curTrack.getAttribute('src'));
+
 			req_track.onreadystatechange = function(){
-				if(req_track.readyState == 4 && (req_track.status == 200 || req_track.status == 0)){
-					if(req_track.responseText != ''){
+				if(req_track.readyState === 4 && (req_track.status === 200 || req_track.status === 0)){
+					if(req_track.responseText !== ''){
 						var kind = curTrack.getAttribute('kind');
-						if(kind == null || kind == ''){ kind = 'subtitles'; }
+						if(kind === null || kind === ''){ kind = 'subtitles'; }
 
 						that.parseTrack(req_track.responseText, kind);
 						
 						if(kind == 'subtitles' || kind == 'captions' || kind == 'descriptions'){
 							var label = curTrack.getAttribute('label');
 							var lang = curTrack.getAttribute('srclang');
-							if(label != null) track_label = label;
-							else if(lang != null) track_label = lang;
+
+							if(label !== null) track_label = label;
+							else if(lang !== null) track_label = lang;
 							else track_label = 'Track '+ (track + 1);
-							var str = '<li class="playr_subtitles_item"><label for="playr_current_cc_'+that.video_id+'_'+track+'">'
-									+'<input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '
-									+track_label
-								+'</label></li>';
+							
+							var str = '<li class="playr_subtitles_item"><label for="playr_current_cc_'+that.video_id+'_'+track+'">'+
+									'<input type="radio" name="playr_current_cc_'+that.video_id+'" id="playr_current_cc_'+that.video_id+'_'+track+'" value="'+track+'" /> '+
+									track_label+
+								'</label></li>';
 							document.getElementById('playr_cc_tracks_'+that.video_id).innerHTML += str;
 						}
 					}
@@ -576,9 +586,9 @@ function Playr(v_id, v_el){
 				that.setActiveTrack();
 			},false);
 			
-			for(i = 0; i < this.track_tags.length; i++){
+			for(var i = 0; i < this.track_tags.length; i++){
 				if(this.track_tags[i].getAttribute('kind') == 'subtitles'){
-					if(this.track_tags[i].getAttribute('srclang') == lang && to_check == 0){
+					if(this.track_tags[i].getAttribute('srclang') == lang && to_check === 0){
 						to_check = i+1;
 					}
 					if(this.track_tags[i].hasAttribute('default')){
@@ -598,14 +608,14 @@ function Playr(v_id, v_el){
 		
 		/**
 		 * Highlights the current track
-		 */		
+		 */
 		Playr.prototype.setActiveTrack = function(){
 			var track_li = document.querySelectorAll('#playr_cc_tracks_'+this.video_id+' li.playr_subtitles_item');
 			var track_inputs = document.querySelectorAll('input[name="playr_current_cc_'+this.video_id+'"]');
 
 			this.disableNativeTextTracks();
 
-			for(i = 0; i < track_inputs.length; i++){
+			for(var i = 0; i < track_inputs.length; i++){
 				if(track_inputs[i].checked){
 					track_li[i].className = 'playr_subtitles_item active_track';
 
@@ -618,17 +628,17 @@ function Playr(v_id, v_el){
 					track_li[i].className = 'playr_subtitles_item';
 				}
 			}
-		}
+		};
 			
 		/**
 		 * Disables native text tracks
 		 */
 		Playr.prototype.disableNativeTextTracks = function(){
 			if(this.nativeTrackSupport){
-				for(i = 0; i < this.video.textTracks.length; i++)
+				for(var i = 0; i < this.video.textTracks.length; i++)
 					this.video.textTracks[i].mode = 'disabled';
 			}
-		}
+		};
 
 		/** 
 		 * Convert MM:SS into seconds
@@ -647,22 +657,25 @@ function Playr(v_id, v_el){
 		 * @return An array of cues' objects
 		 */
 		Playr.prototype.parseTrack = function(track_content, track_kind){
-			if(track_kind == 'subtitles' || track_kind == 'captions' || track_kind == 'descriptions'){ var pattern_identifier = /^([0-9]+)$/; }
-			else if(track_kind == 'chapters'){ var pattern_identifier = /^chapter-([0-9])+$/; }
+			var pattern_identifier = /^([0-9]+)$/;
+			if(track_kind == 'chapters'){
+				pattern_identifier = /^chapter-([0-9])+$/;
+			}
 			
 			var pattern_timecode = /^([0-9]{2}:[0-9]{2}:[0-9]{2}[,.]{1}[0-9]{3}) --\> ([0-9]{2}:[0-9]{2}:[0-9]{2}[,.]{1}[0-9]{3})(.*)$/;
 			var lines = track_content.split(/\r?\n/);
 			
-			var entries = new Array();
-			for(i = 0; i<lines.length; i++) {
+			var entries = [];
+			var identifier;
+			for(var i = 0; i<lines.length; i++) {
 				if(identifier = pattern_identifier.exec(lines[i])){
 					i++;
-					var timecode = pattern_timecode.exec(lines[i])
+					var timecode = pattern_timecode.exec(lines[i]);
 					if(timecode && i<lines.length){
 						i++;
 						var text = lines[i];
 						i++;
-						while(lines[i] != '' && i<lines.length){
+						while(lines[i] !== '' && i<lines.length){
 							text = text + '\n' + lines[i];
 							i++;
 						}
@@ -694,16 +707,16 @@ function Playr(v_id, v_el){
 		
 		/**
 		 * Builds the chapters menu
-		 */		
+		 */
 		Playr.prototype.buildChaptersMenu = function(){
 			var that = this;
 			var track_menu = document.getElementById('playr_cc_tracks_'+this.video_id);
 			if(this.chapters.length > 0){
 				var tmp = '<li class="playr_chapters_menu_title" id="playr_chapters_menu_title_'+this.video_id+'">Chapters <span style="float:right;">&gt;</span><ul class="playr_chapters_menu">';
-				for(i = 0; i < this.chapters[0].length; i++){
+				for(var i = 0; i < this.chapters[0].length; i++){
 					tmp += '<li><a href="#'+this.chapters[0][i].start_tc+'" class="playr_chapter_'+this.video_id+'" id="playr_chapter_'+this.video_id+'_'+i+'">'+this.chapters[0][i].text+'</a> ('+this.chapters[0][i].start_tc.split('.')[0]+')</li>';
 				}
-				tmp += '</ul></li>'
+				tmp += '</ul></li>';
 				track_menu.innerHTML = tmp + track_menu.innerHTML;
 			}
 			var c = document.querySelectorAll('.playr_chapter_'+this.video_id);
@@ -739,8 +752,8 @@ function Playr(v_id, v_el){
 			
 			if(this.current_track >= 0){
 				for(i=0; i<this.subs[this.current_track].length; i++){
-					if((this.video.currentTime + this.subtitlesDelay) >= this.subs[this.current_track][i].start 
-						&& (this.video.currentTime + this.subtitlesDelay) <= this.subs[this.current_track][i].stop){
+					if((this.video.currentTime + this.subtitlesDelay) >= this.subs[this.current_track][i].start &&
+						(this.video.currentTime + this.subtitlesDelay) <= this.subs[this.current_track][i].stop){
 
 						var text = this.subs[this.current_track][i].text;
 						var captions_wrapper = document.getElementById('playr_captions_wrapper_'+this.video_id);
@@ -782,7 +795,7 @@ function Playr(v_id, v_el){
 							text = '<span class="playr_cue_past">' + text;
 						
 						// if cue settings
-						if(this.subs[this.current_track][i].settings != ''){
+						if(this.subs[this.current_track][i].settings !== ''){
 							var text_align = /(A|align):(start|middle|end)/i;
 							var text_size = /(S|size):([0-9]{0,3})%/i;
 							var text_position = /(T|position):([0-9]{0,3})%/i;
@@ -797,9 +810,9 @@ function Playr(v_id, v_el){
 							
 							// if text align specified
 							if(test_ta){
-								if(test_ta[2] == 'start'){ captions_styles.push('text-align:left') }
-								else if(test_ta[2] == 'middle'){ captions_styles.push('text-align:center') }
-								else if(test_ta[2] == 'end'){ captions_styles.push('text-align:right') }
+								if(test_ta[2] == 'start'){ captions_styles.push('text-align:left'); }
+								else if(test_ta[2] == 'middle'){ captions_styles.push('text-align:center'); }
+								else if(test_ta[2] == 'end'){ captions_styles.push('text-align:right'); }
 							}
 							
 							// if text position specified
@@ -813,7 +826,7 @@ function Playr(v_id, v_el){
 							}
 							
 							// if text size specified
-							if(test_ts){ 
+							if(test_ts){
 								var new_font_size = (test_ts[2]/100) * parseInt(this.config.fontSize);
 								captions_styles.push('font-size:'+new_font_size+'pt');
 							}
@@ -823,9 +836,9 @@ function Playr(v_id, v_el){
 								captions_letters_styles.push('display:block');
 								captions_letters_styles.push('min-height:5px');
 								captions_letters_styles.push('min-width:1px');
-								text = '<span style="'+captions_letters_styles.join(';')+'">'
-									+text.split('').join('</span><span style="'+captions_letters_styles.join(';')+'">')
-									+'</span>';
+								text = '<span style="'+captions_letters_styles.join(';')+'">'+
+									text.split('').join('</span><span style="'+captions_letters_styles.join(';')+'">')+
+									'</span>';
 								text = text.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1</span><br /><span>$2');
 
 								captions_lines_styles.push('display:block');
@@ -943,7 +956,7 @@ function Playr(v_id, v_el){
 				break;
 				case 37: // arrow left
 					if(this.video.currentTime - this.config.skipStep < 0){
-						this.video.currentTime = 0;	
+						this.video.currentTime = 0;
 					}
 					else{
 						this.video.currentTime -= this.config.skipStep;
@@ -962,13 +975,13 @@ function Playr(v_id, v_el){
 				break;
 				case 39: // arrow right
 					if(this.video.currentTime + this.config.skipStep > this.video.duration){
-						this.video.currentTime = this.video.duration;	
+						this.video.currentTime = this.video.duration;
 					}
 					else{
 						this.video.currentTime += this.config.skipStep;
 					}
 					ev.preventDefault();
-				break;				
+				break;
 				case 40: // arrow down
 					if(this.video.volume - this.config.volumeStep < 0){
 						this.video.volume = 0;
@@ -1004,11 +1017,9 @@ function Playr(v_id, v_el){
 		Playr.prototype.scrollHandler = function(ev){
 			if(!this.playrHasFocus() || !this.isFullscreen) return true;
 
+			var rolled = -ev.detail;
 			if('wheelDelta' in ev) {
 				rolled = ev.wheelDelta;
-			}
-			else{
-				rolled = -ev.detail;
 			}
 
 			if(rolled < 0){
@@ -1042,7 +1053,7 @@ function Playr(v_id, v_el){
 			overlay.innerHTML = '<span style="font-size:0.7em;">'+message+'</span>';
 			overlay.style.opacity = 1;
 			setTimeout(function(){ overlay.style.opacity = 0; }, duration);
-		}
+		};
 
 		/*
 		 * Setup the player
@@ -1066,12 +1077,12 @@ function Playr(v_id, v_el){
 	 * Init the player
 	 */
 	this.setup();
-};
+}
 
 window.addEventListener('DOMContentLoaded',function(){
 	var video_tags = document.querySelectorAll('video.playr_video');
 	var video_objects = [];
-	for(v = 0; v < video_tags.length; v++){
+	for(var v = 0; v < video_tags.length; v++){
 		video_objects.push(new Playr(v, video_tags[v]));
 	}
 }, false);
